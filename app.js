@@ -276,8 +276,11 @@ const progressionExerciseImageMap = progressions.reduce((map, category) => {
 
 let state = loadState();
 let view = { name: hasSavedPlan(state) ? "home" : "plan", programId: state.programId || "beginner", draftExercises: null, categoryId: null, editingHistoryId: null, completion: null };
-let timerState = { mode: "rest", duration: 60, remaining: 60, running: false, endsAt: null };
+let timerState = { mode: "rest", restDuration: 60, duration: 60, remaining: 60, running: false, endsAt: null, alarm: false };
 let timerTick = null;
+let timerAlarmTick = null;
+let timerAudioContext = null;
+let lastTimerSecond = null;
 
 const app = document.querySelector("#app");
 
@@ -641,16 +644,22 @@ function renderTimer() {
   app.innerHTML = `
     <section class="screen timer-screen">
       ${topbar("Bấm giờ", "")}
-      <div class="timer-mode-tabs">
+      ${isDone ? "" : `<div class="timer-mode-tabs">
         <button class="timer-mode ${timerState.mode === "rest" ? "active rest" : ""}" data-action="timer-mode" data-mode="rest">REST</button>
         <button class="timer-mode ${timerState.mode === "break" ? "active break" : ""}" data-action="timer-mode" data-mode="break">BREAK</button>
-      </div>
+      </div>`}
+      ${!isDone && timerState.mode === "rest" ? `
+        <div class="timer-duration-tabs" aria-label="Rest duration">
+          <button class="timer-duration ${timerState.restDuration === 60 ? "active" : ""}" data-action="timer-duration" data-duration="60">1 phút</button>
+          <button class="timer-duration ${timerState.restDuration === 120 ? "active" : ""}" data-action="timer-duration" data-duration="120">2 phút</button>
+        </div>
+      ` : ""}
       <div class="timer-watch ${timerState.mode}" style="--timer-progress:${Math.round(progress * 360)}deg; --timer-accent:${modeConfig.accent};">
         ${isDone ? `
           <p class="eyebrow">BACK TO WORK</p>
           <h1>NEXT SET</h1>
-          <p class="muted">Next exercise is ready</p>
-          <button class="btn primary pulse" data-action="timer-mode" data-mode="rest">START NEXT SET</button>
+          <p class="muted">Chuông sẽ dừng khi bạn tiếp tục tập.</p>
+          <button class="btn primary pulse" data-action="timer-continue">Tiếp tục tập</button>
         ` : `
           <p class="eyebrow">${modeConfig.title}</p>
           <div class="timer-ring">
@@ -671,23 +680,26 @@ function renderTimer() {
 
 function getTimerModeConfig(mode) {
   if (mode === "break") return { title: "BREAK TIME", subtitle: "Take a short break", duration: 180, accent: "#31c5ff" };
-  return { title: "REST TIME", subtitle: "Rest between sets", duration: 60, accent: "#ff5a00" };
+  return { title: "REST TIME", subtitle: "Rest between sets", duration: timerState.restDuration || 60, accent: "#ff5a00" };
 }
 
 function setTimerMode(mode) {
   const config = getTimerModeConfig(mode);
   stopTimer();
-  timerState = { mode, duration: config.duration, remaining: config.duration, running: false, endsAt: null };
+  stopTimerAlarm();
+  timerState = { ...timerState, mode, duration: config.duration, remaining: config.duration, running: false, endsAt: null, alarm: false };
   setView({ name: "timer" });
 }
 
 function toggleTimer() {
   if (timerState.remaining <= 0) setTimerMode(timerState.mode);
+  ensureTimerAudio();
   if (timerState.running) {
     timerState.remaining = Math.max(0, Math.ceil((timerState.endsAt - Date.now()) / 1000));
     stopTimer();
   } else {
     timerState.running = true;
+    timerState.alarm = false;
     timerState.endsAt = Date.now() + (timerState.remaining * 1000);
     startTimerTick();
   }
@@ -697,21 +709,33 @@ function toggleTimer() {
 function resetTimer() {
   const config = getTimerModeConfig(timerState.mode);
   stopTimer();
-  timerState = { mode: timerState.mode, duration: config.duration, remaining: config.duration, running: false, endsAt: null };
+  stopTimerAlarm();
+  timerState = { ...timerState, duration: config.duration, remaining: config.duration, running: false, endsAt: null, alarm: false };
   renderTimer();
 }
 
 function skipTimer() {
   stopTimer();
-  timerState = { ...timerState, remaining: 0, running: false, endsAt: null };
+  completeTimer();
+}
+
+function setTimerDuration(seconds) {
+  const duration = clampNumber(Number(seconds || 60), 60, 120);
+  stopTimer();
+  stopTimerAlarm();
+  timerState = { ...timerState, mode: "rest", restDuration: duration, duration, remaining: duration, running: false, endsAt: null, alarm: false };
   renderTimer();
 }
 
 function startTimerTick() {
   clearInterval(timerTick);
+  lastTimerSecond = timerState.remaining;
   timerTick = setInterval(() => {
-    timerState.remaining = Math.max(0, Math.ceil((timerState.endsAt - Date.now()) / 1000));
-    if (timerState.remaining <= 0) stopTimer();
+    const nextRemaining = Math.max(0, Math.ceil((timerState.endsAt - Date.now()) / 1000));
+    if (nextRemaining !== lastTimerSecond && nextRemaining > 0) playTimerTick();
+    lastTimerSecond = nextRemaining;
+    timerState.remaining = nextRemaining;
+    if (timerState.remaining <= 0) completeTimer();
     if (view.name === "timer") renderTimer();
   }, 250);
 }
@@ -720,6 +744,67 @@ function stopTimer() {
   clearInterval(timerTick);
   timerTick = null;
   timerState.running = false;
+  lastTimerSecond = null;
+}
+
+function completeTimer() {
+  stopTimer();
+  timerState = { ...timerState, remaining: 0, running: false, endsAt: null, alarm: true };
+  startTimerAlarm();
+  if (view.name === "timer") renderTimer();
+}
+
+function continueTimerWorkout() {
+  stopTimer();
+  stopTimerAlarm();
+  const config = getTimerModeConfig("rest");
+  timerState = { ...timerState, mode: "rest", duration: config.duration, remaining: config.duration, running: false, endsAt: null, alarm: false };
+  renderTimer();
+}
+
+function ensureTimerAudio() {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return null;
+  if (!timerAudioContext) timerAudioContext = new AudioContext();
+  if (timerAudioContext.state === "suspended") timerAudioContext.resume();
+  return timerAudioContext;
+}
+
+function playTimerTone(frequency, duration, volume = 0.08) {
+  const context = ensureTimerAudio();
+  if (!context) return;
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(frequency, context.currentTime);
+  gain.gain.setValueAtTime(volume, context.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start();
+  oscillator.stop(context.currentTime + duration);
+}
+
+function playTimerTick() {
+  playTimerTone(880, 0.045, 0.035);
+}
+
+function playTimerAlarm() {
+  playTimerTone(660, 0.18, 0.09);
+  setTimeout(() => playTimerTone(990, 0.22, 0.09), 190);
+}
+
+function startTimerAlarm() {
+  ensureTimerAudio();
+  if (timerAlarmTick) return;
+  playTimerAlarm();
+  timerAlarmTick = setInterval(playTimerAlarm, 1200);
+}
+
+function stopTimerAlarm() {
+  clearInterval(timerAlarmTick);
+  timerAlarmTick = null;
+  timerState.alarm = false;
 }
 
 function formatTimer(totalSeconds) {
@@ -745,7 +830,7 @@ function renderHistoryItem(item) {
 function topbar(title, backAction, extraActions = "") {
   return `
     <div class="topbar ${backAction ? "with-back" : ""}">
-      ${backAction ? `<button class="back-fab" data-action="${backAction}" aria-label="Quay lại">‹</button>` : ""}
+      ${backAction ? `<button class="back-fab" data-action="${backAction}" aria-label="Quay lại"></button>` : ""}
       <div class="brand">
         <p class="eyebrow">Simple Bodyweight Tracker</p>
         <h1>${escapeHtml(title)}</h1>
@@ -1368,9 +1453,11 @@ app.addEventListener("click", (event) => {
   if (action === "fixed-detail") setView({ name: "fixed", fixedItemId: button.dataset.item });
   if (action === "timer") setView({ name: "timer" });
   if (action === "timer-mode") setTimerMode(button.dataset.mode);
+  if (action === "timer-duration") setTimerDuration(button.dataset.duration);
   if (action === "timer-toggle") toggleTimer();
   if (action === "timer-reset") resetTimer();
   if (action === "timer-skip") skipTimer();
+  if (action === "timer-continue") continueTimerWorkout();
   if (action === "program-option") setView({ name: "plan", programId: button.dataset.program, draftExercises: { ...state.currentExercises, ...(view.draftExercises || {}) } });
   if (action === "variation") {
     setView({
