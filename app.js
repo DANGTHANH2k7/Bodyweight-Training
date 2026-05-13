@@ -53,13 +53,13 @@ const PROGRAM_TEMPLATES = [
     summary: "3 ngày/tuần, khóa bài nền tảng trong 8 tuần trước khi chuyển sang Basic routine.",
     lockedSetup: true,
     routineItems: [
-      { id: "day_1", kind: "fixed", title: "DAY 1", prescription: "Warm up, squats, horizontal pulls, push ups, plank, stretches", note: "3 sets, 8-12 reps; 60s rest. Plank 30-60s.", link: WARM_UP_LINK },
+      { id: "beginner_warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Before every workout.", link: WARM_UP_LINK },
       { id: "beginner_squat", kind: "category", categoryId: "squat", title: "Squat variation", prescription: "3 sets, 8-12 reps", note: "Day 1, Day 3, Day 5." },
       { id: "beginner_horizontal_pull", kind: "category", categoryId: "horizontal_pull", title: "Horizontal pull variation", prescription: "3 sets, 8-12 reps", note: "Day 1, Day 3, Day 5." },
       { id: "beginner_push_up", kind: "category", categoryId: "push_up", title: "Push up variation", prescription: "3 sets, 8-12 reps", note: "Day 1, Day 3, Day 5." },
       { id: "beginner_plank", kind: "category", categoryId: "plank", title: "Plank variation", prescription: "30-60s", note: "Day 1 and Day 5." },
       { id: "beginner_leg_raises", kind: "category", categoryId: "leg_raises", title: "Leg raises variation", prescription: "3 sets, 8-12 reps", note: "Day 3." },
-      { id: "beginner_rest", kind: "fixed", title: "Rest days", prescription: "Day 2, Day 4, Day 6, Day 7", note: "Follow for at least 8 weeks.", link: STRETCHING_LINK },
+      { id: "beginner_static_stretching", kind: "fixed", title: "Static stretching", prescription: "10 min", note: "After every workout.", link: STRETCHING_LINK },
     ],
   },
   {
@@ -356,9 +356,9 @@ function render() {
 
   if (view.name === "list") renderExerciseList();
   if (view.name === "track") renderTrack();
-  if (view.name === "complete") renderCompletion();
   if (view.name === "accumulation") renderAccumulation();
   if (view.name === "timer") renderTimer();
+  if (view.name === "fixed") renderFixedDetail();
   if (view.name === "home") renderHome();
 }
 
@@ -373,7 +373,7 @@ function renderPlan() {
           <p class="eyebrow">Simple Bodyweight Tracker</p>
           <h1>${hasSavedPlan(state) ? "Sửa plan" : "Plan tập của bạn"}</h1>
         </div>
-        ${hasSavedPlan(state) ? `<button class="btn ghost" data-action="home">Quay lại</button>` : ""}
+        <button class="btn primary" type="submit" form="plan-form">Lưu plan</button>
       </div>
       <div class="program-options">
         ${PROGRAM_TEMPLATES.map((template) => `
@@ -389,11 +389,10 @@ function renderPlan() {
         <h2>${escapeHtml(program.label)}</h2>
         <p class="muted">${program.lockedSetup ? "Complete beginner chỉ tập các nhóm bài được liệt kê để xây nền. Không chọn variation ở bước setup." : "Mỗi trường progression chỉ hiện khoảng 4 bài một lúc. Kéo trong danh sách để chọn bài phù hợp hiện tại."}</p>
       </div>
-      <form class="form" data-form="plan" data-program="${program.id}">
+      <form id="plan-form" class="form" data-form="plan" data-program="${program.id}">
         <div class="routine-editor">
           ${routineItems.map((item) => renderRoutineSetupItem(item, draftExercises, program)).join("")}
         </div>
-        <button class="btn primary" type="submit">Lưu plan</button>
       </form>
       ${hasSavedPlan(state) ? renderBottomNav("profile") : ""}
     </section>
@@ -430,12 +429,48 @@ function renderExerciseList() {
   const canUndoReset = isTodayTimestamp(state.completionResetAt);
   app.innerHTML = `
     <section class="screen">
-      ${topbar("Chọn bài tập", "home", `
+      ${topbar("Chọn bài tập", "", `
         <button class="btn small" data-action="reset-today" ${hasVisibleCompletions ? "" : "disabled"}>Reset</button>
         <button class="btn small" data-action="undo-reset" ${canUndoReset ? "" : "disabled"}>Undo</button>
       `)}
       <div class="list">
         ${state.routineItems.map((item, index) => renderWorkoutRow(item, index)).join("")}
+      </div>
+      ${renderBottomNav("workouts")}
+    </section>
+  `;
+}
+
+function renderFixedDetail() {
+  const item = getRoutineItem(view.fixedItemId);
+  if (!item) {
+    setView({ name: "list", fixedItemId: null });
+    return;
+  }
+  const completedEntry = getVisibleTodayEntries().find((entry) => entry.kind === "fixed" && entry.itemId === item.id);
+  const imageUrl = getFixedItemImage(item);
+  app.innerHTML = `
+    <section class="screen">
+      ${topbar(item.title, "list")}
+      <div class="exercise-row workout-card routine-static${completedEntry ? " completed" : ""}" style="--card-image:url('${imageUrl}')">
+        <span class="card-overlay"></span>
+        <span class="row-main">
+          <span class="card-kicker">${escapeHtml(getFixedItemLabel(item))}</span>
+          <strong class="card-title">${escapeHtml(item.title)}</strong>
+          <span class="row-meta">${escapeHtml(item.note)}</span>
+          ${completedEntry ? `<span class="done-line">Hoàn thành hôm nay</span>` : ""}
+        </span>
+        <span class="row-actions">
+          ${completedEntry
+            ? `<span class="btn small card-undo-button" data-action="undo-fixed" data-entry="${completedEntry.id}">Undo</span>`
+            : `<span class="target-pill">${escapeHtml(item.prescription)}</span>`}
+        </span>
+      </div>
+      <div class="panel">
+        <div class="actions">
+          ${item.link ? `<a class="btn guide-button" href="${item.link}" target="_blank" rel="noreferrer">Xem hướng dẫn</a>` : ""}
+          ${completedEntry ? "" : `<button class="btn primary" data-action="toggle-fixed" data-item="${item.id}" data-title="${escapeHtml(item.title)}" data-prescription="${escapeHtml(item.prescription)}">Check done</button>`}
+        </div>
       </div>
       ${renderBottomNav("workouts")}
     </section>
@@ -453,7 +488,12 @@ function renderTrack() {
   const exercise = getCurrentExercise(category);
   const target = progress.nextTarget;
   const historyItem = view.editingHistoryId ? state.history.find((item) => item.id === view.editingHistoryId) : null;
-  const initial = historyItem ? historyItem.result : target;
+  const completedEntry = getVisibleTodayEntries().find((entry) => entry.category === category.id && entry.exerciseName === exercise)
+    || getVisibleTodayEntries().find((entry) => entry.category === category.id);
+  const initial = historyItem ? historyItem.result : completedEntry ? completedEntry.result : target;
+  const trackAction = completedEntry && !historyItem
+    ? `<button class="btn card-undo-button" type="button" data-action="undo-exercise" data-entry="${completedEntry.id}">Undo</button>`
+    : `<button class="btn primary" type="submit">${historyItem ? "Lưu chỉnh sửa" : "Hoàn thành"}</button>`;
 
   app.innerHTML = `
     <section class="screen">
@@ -471,7 +511,7 @@ function renderTrack() {
       <form class="panel form" data-form="track" data-category="${category.id}" data-history-id="${view.editingHistoryId || ""}">
         <p class="eyebrow">${historyItem ? "Nhập lần gần nhất" : "Nhập kết quả"}</p>
         ${category.type === "seconds" ? renderSecondsInput(Number(initial || PLANK_START)) : renderRepInputs(initial)}
-        <button class="btn primary" type="submit">${historyItem ? "Lưu chỉnh sửa" : "Hoàn thành"}</button>
+        ${trackAction}
       </form>
       ${renderBottomNav("workouts")}
     </section>
@@ -504,51 +544,11 @@ function renderSecondsInput(value) {
   `;
 }
 
-function renderCompletion() {
-  const completion = view.completion;
-  if (!completion) {
-    setView({ name: "list" });
-    return;
-  }
-
-  const category = getCategory(completion.categoryId);
-  const nextExercise = getNextExercise(category);
-  app.innerHTML = `
-    <section class="screen">
-      ${topbar("Đã lưu kết quả", "list")}
-      <div class="panel">
-        <p class="eyebrow">${escapeHtml(category.title)}</p>
-        <h2>${escapeHtml(completion.exerciseName)}</h2>
-        <div class="summary-grid">
-          <div class="metric"><span>Bạn đã đạt</span><strong>${formatResult(completion.result, category.type)}</strong></div>
-          <div class="metric"><span>Mục tiêu buổi sau</span><strong>${formatResult(state.progress[category.id].nextTarget, category.type)}</strong></div>
-        </div>
-        ${completion.ready && nextExercise ? `
-          <div class="notice">
-            Bạn đủ điều kiện chuyển sang: <strong>${escapeHtml(nextExercise)}</strong>
-          </div>
-          <div class="actions">
-            <button class="btn primary" data-action="advance" data-category="${category.id}">Chuyển sang bài tiếp theo</button>
-            <button class="btn" data-action="list">Để sau</button>
-          </div>
-        ` : `
-          <p class="muted">Kết quả đã được lưu vào lịch sử.</p>
-          <div class="actions">
-            <button class="btn primary" data-action="list">Tiếp tục buổi tập</button>
-            <button class="btn" data-action="accumulation">Tích lũy</button>
-          </div>
-        `}
-      </div>
-      ${renderBottomNav("workouts")}
-    </section>
-  `;
-}
-
 function renderAccumulation() {
   const recent = state.history[0];
   app.innerHTML = `
     <section class="screen">
-      ${topbar("Tích lũy", "home")}
+      ${topbar("Tích lũy", "")}
       <div class="panel profile-plan">
         <p class="eyebrow">Plan hiện tại</p>
         <h2>${escapeHtml(getPlanLabel())}</h2>
@@ -595,7 +595,7 @@ function renderTimer() {
   const isDone = timerState.remaining <= 0;
   app.innerHTML = `
     <section class="screen timer-screen">
-      ${topbar("Bấm giờ", "home")}
+      ${topbar("Bấm giờ", "")}
       <div class="timer-mode-tabs">
         <button class="timer-mode ${timerState.mode === "rest" ? "active rest" : ""}" data-action="timer-mode" data-mode="rest">REST</button>
         <button class="timer-mode ${timerState.mode === "break" ? "active break" : ""}" data-action="timer-mode" data-mode="break">BREAK</button>
@@ -706,7 +706,7 @@ function topbar(title, backAction, extraActions = "") {
       </div>
       <div class="topbar-actions">
         ${extraActions}
-        <button class="btn ghost" data-action="${backAction}">Quay lại</button>
+        ${backAction ? `<button class="btn ghost" data-action="${backAction}">Quay lại</button>` : ""}
       </div>
     </div>
   `;
@@ -734,8 +734,6 @@ function renderBottomNav(active) {
 function completeExercise(category, result, historyId = null) {
   const exerciseName = getCurrentExercise(category);
   const existingHistory = historyId ? state.history.find((item) => item.id === historyId) : null;
-  const ready = hasReachedGoal(category, result);
-
   const historyEntry = {
     id: historyId || crypto.randomUUID(),
     date: existingHistory ? existingHistory.date : todayIso(),
@@ -759,14 +757,10 @@ function completeExercise(category, result, historyId = null) {
 
   saveState();
   setView({
-    name: "complete",
+    name: "track",
+    categoryId: category.id,
     editingHistoryId: null,
-    completion: {
-      categoryId: category.id,
-      exerciseName,
-      result,
-      ready,
-    },
+    completion: null,
   });
 }
 
@@ -974,7 +968,7 @@ function toggleFixedCompletion(itemId, title, prescription) {
     result: prescription,
   }, ...state.history];
   saveState();
-  setView({ name: "list" });
+  setView(view.name === "fixed" ? { name: "fixed", fixedItemId: itemId } : { name: "list" });
 }
 
 function undoFixedCompletion(entryId) {
@@ -982,7 +976,7 @@ function undoFixedCompletion(entryId) {
   if (!entry || entry.kind !== "fixed") return;
   state.history = state.history.filter((item) => item.id !== entryId);
   saveState();
-  setView({ name: "list" });
+  setView(view.name === "fixed" ? { name: "fixed", fixedItemId: entry.itemId } : { name: "list" });
 }
 
 function undoExerciseCompletion(entryId) {
@@ -1043,6 +1037,10 @@ function getRoutineCategory(item) {
   return null;
 }
 
+function getRoutineItem(itemId) {
+  return state.routineItems.find((item) => item.id === itemId) || null;
+}
+
 function getExerciseImageKey(category, exerciseName) {
   const name = exerciseName.toLowerCase();
   if (name.includes("pistol") || name.includes("one-legged") || name.includes("one legged")) return "pistol_squat";
@@ -1069,6 +1067,13 @@ function getFixedItemImage(item) {
   if (text.includes("stretch")) return exerciseImageMap.stretching;
   if (text.includes("warm")) return exerciseImageMap.warm_up;
   return exerciseImageMap.mobility;
+}
+
+function getFixedItemLabel(item) {
+  const text = `${item.id} ${item.title} ${item.prescription}`.toLowerCase();
+  if (text.includes("stretch")) return "Stretch";
+  if (text.includes("warm")) return "Warm Up";
+  return "Mobility";
 }
 
 function getShortCategoryLabel(categoryId) {
@@ -1171,22 +1176,20 @@ function renderWorkoutRow(item, index) {
     const completedClass = completedEntry ? " completed" : "";
     const imageUrl = getFixedItemImage(item);
     return `
-      <div class="exercise-row workout-card routine-static${completedClass}" style="--card-image:url('${imageUrl}')">
+      <button class="exercise-row workout-card routine-static${completedClass}" data-action="fixed-detail" data-item="${item.id}" style="--card-image:url('${imageUrl}')">
         <span class="card-overlay"></span>
         <span class="row-main">
-          <span class="card-kicker">MOBILITY</span>
+          <span class="card-kicker">${escapeHtml(getFixedItemLabel(item))}</span>
           <strong class="card-title">${number} ${escapeHtml(item.title)}</strong>
           <span class="row-meta">${escapeHtml(item.note)}</span>
           ${completedEntry ? `<span class="done-line">Hoàn thành hôm nay</span>` : ""}
-          ${item.link ? `<a class="btn guide-button" href="${item.link}" target="_blank" rel="noreferrer">Xem hướng dẫn</a>` : ""}
         </span>
         <span class="row-actions">
-          <span class="target-pill">${escapeHtml(item.prescription)}</span>
           ${completedEntry
-            ? `<button class="btn small" data-action="undo-fixed" data-entry="${completedEntry.id}">Undo</button>`
-            : `<button class="btn small primary" data-action="toggle-fixed" data-item="${item.id}" data-title="${escapeHtml(item.title)}" data-prescription="${escapeHtml(item.prescription)}">Check done</button>`}
+            ? `<span class="btn small card-undo-button" data-action="undo-fixed" data-entry="${completedEntry.id}">Undo</span>`
+            : `<span class="target-pill">${escapeHtml(item.prescription)}</span>`}
         </span>
-      </div>
+      </button>
     `;
   }
 
@@ -1202,6 +1205,10 @@ function renderWorkoutRow(item, index) {
   const difficulty = getExerciseDifficulty(category);
   const imageUrl = exerciseImageMap[imageKey] || exerciseImageMap.strength;
   const alternatingNote = item.kind === "alternating" ? `Luân phiên: hôm nay ${category.id === "push_up" ? "push up" : "dip"}` : item.note;
+  const rowActions = [
+    ready ? `<span class="status-pill ready">Đủ lên bài</span>` : "",
+    ...completedEntries.map((entry) => `<span class="btn small card-undo-button" data-action="undo-exercise" data-entry="${entry.id}">Undo</span>`),
+  ].filter(Boolean).join("");
   return `
     <button class="exercise-row workout-card${completedClass}" data-action="track" data-category="${category.id}" style="--card-image:url('${imageUrl}')">
       <span class="card-overlay"></span>
@@ -1227,10 +1234,7 @@ function renderWorkoutRow(item, index) {
         ${ready ? `<span class="row-meta">Gợi ý: chuyển sang ${escapeHtml(getNextExercise(category) || "bài cuối")}</span>` : ""}
         <span class="card-field-label">${escapeHtml(getShortCategoryLabel(category.id))}</span>
       </span>
-      <span class="row-actions">
-        <span class="${ready ? "status-pill ready" : "target-pill"}">${ready ? "Đủ lên bài" : formatResult(progress.nextTarget, category.type)}</span>
-        ${completedEntries.map((entry) => `<span class="btn small" data-action="undo-exercise" data-entry="${entry.id}">Undo</span>`).join("")}
-      </span>
+      ${rowActions ? `<span class="row-actions">${rowActions}</span>` : ""}
     </button>
   `;
 }
@@ -1300,6 +1304,7 @@ app.addEventListener("click", (event) => {
   if (action === "list") setView({ name: "list", completion: null, editingHistoryId: null });
   if (action === "accumulation") setView({ name: "accumulation", completion: null, editingHistoryId: null });
   if (action === "edit-plan") setView({ name: "plan" });
+  if (action === "fixed-detail") setView({ name: "fixed", fixedItemId: button.dataset.item });
   if (action === "timer") setView({ name: "timer" });
   if (action === "timer-mode") setTimerMode(button.dataset.mode);
   if (action === "timer-toggle") toggleTimer();
