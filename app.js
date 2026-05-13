@@ -376,6 +376,7 @@ function render() {
   if (view.name === "list") renderExerciseList();
   if (view.name === "track") renderTrack();
   if (view.name === "accumulation") renderAccumulation();
+  if (view.name === "achievement") renderAchievement();
   if (view.name === "timer") renderTimer();
   if (view.name === "fixed") renderFixedDetail();
   if (view.name === "home") renderHome();
@@ -419,27 +420,67 @@ function renderPlan() {
 }
 
 function renderHome() {
-  const readyCount = progressions.filter((category) => isReadyToAdvance(category)).length;
   app.innerHTML = `
-    <section class="screen">
-      <div class="hero">
-        <div class="hero-content">
-          <p class="eyebrow">Simple Bodyweight Tracker</p>
-          <h1>Hôm nay tập gì?</h1>
-          <div class="panel">
-            <p class="eyebrow">Plan hiện tại</p>
-            <h2>${escapeHtml(getPlanLabel())}</h2>
-            <p class="plan-text">${escapeHtml(formatRoutineSummary())}</p>
-            ${readyCount ? `<p class="notice">${readyCount} progression đã đủ điều kiện lên bài mới.</p>` : ""}
-            <div class="actions">
-              <button class="btn primary" data-action="list">Bắt đầu buổi tập</button>
-              <button class="btn" data-action="accumulation">Tích lũy</button>
-            </div>
-          </div>
-        </div>
+    <section class="screen home-screen">
+      <div class="home-topbar">
+        <strong>Start Bodyweight</strong>
+        <button class="btn small home-plan-button" data-action="edit-plan">Xem plan</button>
       </div>
+      <section class="home-hero">
+        <div class="home-hero-copy">
+          <p class="home-logo"><span class="home-logo-mark">S</span><span>Start<br />Bodyweight</span></p>
+          <h1>Smarter Plan.<br />Stronger You.<br /><span>Every Day.</span></h1>
+          <p class="home-description">The all-in-one app inspired by Start Bodyweight by Nick Janvier. Plan your workouts, track your progress, and build real strength with bodyweight training.</p>
+          <button class="btn primary home-cta" data-action="list">Start Working Out <span>→</span></button>
+        </div>
+        <div class="home-hero-media" aria-hidden="true">
+          <span class="home-phone-card">
+            <span class="home-phone-time">9:41</span>
+            <span class="home-phone-kicker">Today's workout</span>
+            <strong>Workout A</strong>
+            <em>Upper Body Focus</em>
+            <span class="home-phone-row"><b>Warm-up</b><i>10:00</i></span>
+            <span class="home-phone-row"><b>${state.routineItems.length} Exercises</b><i>45:00</i></span>
+            <span class="home-phone-row"><b>Next Goal</b><i>8,8,8</i></span>
+          </span>
+        </div>
+      </section>
+      <section class="home-intro-grid">
+        ${renderHomeIntroCard("1", "Plan", "calendar", "Get a personalized workout plan that fits your schedule and goals.")}
+        ${renderHomeIntroCard("2", "Track", "bar_chart", "Log your workouts, sets, reps, and variations. See your progress clearly.")}
+        ${renderHomeIntroCard("3", "Progress", "trend_up", "Follow a proven system with smart progression, deloads, and level-ups built in.")}
+        ${renderHomeIntroCard("4", "Motivate", "trophy", "Unlock skills, earn achievements, and stay inspired every step of the way.")}
+      </section>
+      <section class="home-trust-bar">
+        ${renderHomeTrustItem("shield", "Built on a proven method", "By Nick Janvier")}
+        ${renderHomeTrustItem("users", "Trusted by thousands", "Worldwide")}
+        ${renderHomeTrustItem("lightning", "No gym. Just results.", "Anywhere, anytime")}
+      </section>
       ${renderBottomNav("home")}
     </section>
+  `;
+}
+
+function renderHomeIntroCard(number, title, icon, description) {
+  return `
+    <article class="home-intro-card">
+      <span class="home-card-icon">${iconSvg(icon)}</span>
+      <span class="home-card-number">${number}</span>
+      <span class="home-card-copy">
+        <h2>${escapeHtml(title)}</h2>
+        <p>${escapeHtml(description)}</p>
+      </span>
+    </article>
+  `;
+}
+
+function renderHomeTrustItem(icon, title, subtitle) {
+  return `
+    <div class="home-trust-item">
+      <span>${iconSvg(icon)}</span>
+      <strong>${escapeHtml(title)}</strong>
+      <em>${escapeHtml(subtitle)}</em>
+    </div>
   `;
 }
 
@@ -546,11 +587,11 @@ function renderTrack() {
 
   app.innerHTML = `
     <section class="screen">
-      ${topbar(category.title, "list")}
+      ${topbar(category.title, "list", "", "compact")}
       ${isCompletedView ? "" : `<div class="panel track-overview">
         <div class="track-overview-main">
-          <p class="eyebrow">Bài hiện tại</p>
-          <h2>${escapeHtml(exercise)}</h2>
+          <p class="eyebrow">${escapeHtml(category.title)}</p>
+          <h2 class="track-exercise-title">${escapeHtml(exercise)}</h2>
           <div class="summary-grid vertical">
             <div class="metric"><span>Mục tiêu hôm nay</span><strong>${formatResult(target, category.type)}</strong></div>
             <div class="metric"><span>Lần gần nhất</span><strong>${formatResult(progress.lastResult, category.type)}</strong></div>
@@ -596,37 +637,12 @@ function renderAccumulation() {
   const recent = state.history[0];
   app.innerHTML = `
     <section class="screen">
-      ${topbar("Tích lũy", "")}
+      ${topbar("Profile", "")}
       <div class="panel profile-plan">
         <p class="eyebrow">Plan hiện tại</p>
         <h2>${escapeHtml(getPlanLabel())}</h2>
         <p class="plan-text">${escapeHtml(formatRoutineSummary())}</p>
         <button class="btn primary" data-action="edit-plan">Sửa plan</button>
-      </div>
-      <div class="list">
-        ${progressions.map((category) => {
-          const progress = state.progress[category.id];
-          const ready = isReadyToAdvance(category);
-          const latestEntry = getLatestHistoryEntry(category.id);
-          return `
-            <div class="panel">
-              <div class="topbar">
-                <div class="brand">
-                  <h3>${escapeHtml(category.title)}</h3>
-                  <p class="muted">Hiện tại: ${escapeHtml(getCurrentExercise(category))}</p>
-                </div>
-                <span class="${ready ? "status-pill ready" : "target-pill"}">${ready ? "Đủ lên bài" : progressPercent(category) + "%"}</span>
-              </div>
-              <div class="summary-grid">
-                <div class="metric"><span>Lần gần nhất</span><strong>${formatResult(progress.lastResult, category.type)}</strong></div>
-                <div class="metric"><span>Mục tiêu kế tiếp</span><strong>${formatResult(progress.nextTarget, category.type)}</strong></div>
-                <div class="metric"><span>Cần đạt</span><strong>${formatGoal(category.type)}</strong></div>
-              </div>
-              ${ready && getNextExercise(category) ? `<p class="notice">Gợi ý: chuyển sang ${escapeHtml(getNextExercise(category))}</p>` : ""}
-              ${latestEntry ? `<button class="btn" data-action="edit-history" data-history-id="${latestEntry.id}">Sửa lần gần nhất</button>` : ""}
-            </div>
-          `;
-        }).join("")}
       </div>
       <div class="panel">
         <h2>Lịch sử gần nhất</h2>
@@ -634,6 +650,70 @@ function renderAccumulation() {
       </div>
       ${renderBottomNav("profile")}
     </section>
+  `;
+}
+
+function renderAchievement() {
+  app.innerHTML = `
+    <section class="screen achievement-screen">
+      ${topbar("Achievement", "")}
+      <div class="achievement-legend">
+        <button class="achievement-filter">All Progressions</button>
+        ${renderAchievementLegendItem("beginner", "Beginner")}
+        ${renderAchievementLegendItem("intermediate", "Intermediate")}
+        ${renderAchievementLegendItem("pro", "Pro")}
+        ${renderAchievementLegendItem("master", "Master")}
+      </div>
+      <div class="achievement-list">
+        ${progressions.map((category) => renderAchievementCard(category)).join("")}
+      </div>
+      ${renderBottomNav("achievement")}
+    </section>
+  `;
+}
+
+function renderAchievementLegendItem(tier, label) {
+  return `
+    <span class="achievement-legend-item">
+      <span class="achievement-dot tier-${tier}"></span>
+      ${label}
+    </span>
+  `;
+}
+
+function renderAchievementCard(category) {
+  const currentIndex = state.currentExercises[category.id] || 0;
+  const achievedCount = currentIndex + 1;
+  const total = category.exercises.length;
+  const percent = Math.round((achievedCount / total) * 100);
+  const tier = getAchievementTier(currentIndex, total);
+  return `
+    <article class="achievement-card tier-${tier}">
+      <div class="achievement-icon-ring">
+        <img class="achievement-image" src="./images/achievements/${category.id}.png" alt="" />
+      </div>
+      <div class="achievement-title-block">
+        <h2>${escapeHtml(category.title)}</h2>
+        <p>${achievedCount}/${total} skills <span>${percent}%</span></p>
+      </div>
+      <div class="achievement-track">
+        <div class="achievement-steps">
+          ${category.exercises.map((exercise, index) => `
+            <span
+              class="achievement-step ${index <= currentIndex ? "achieved" : ""} ${index === currentIndex ? "current" : ""}"
+              title="${escapeHtml(exercise)}"
+            >${index + 1}</span>
+          `).join("")}
+        </div>
+        <div class="achievement-tier-labels">
+          <span class="tier-beginner">Beginner</span>
+          <span class="tier-intermediate">Intermediate</span>
+          <span class="tier-pro">Pro</span>
+          <span class="tier-master">Master</span>
+        </div>
+      </div>
+      <button class="achievement-open" data-action="track" data-category="${category.id}" aria-label="${escapeHtml(category.title)}">›</button>
+    </article>
   `;
 }
 
@@ -827,9 +907,9 @@ function renderHistoryItem(item) {
   `;
 }
 
-function topbar(title, backAction, extraActions = "") {
+function topbar(title, backAction, extraActions = "", variant = "") {
   return `
-    <div class="topbar ${backAction ? "with-back" : ""}">
+    <div class="topbar ${backAction ? "with-back" : ""} ${variant ? `topbar-${variant}` : ""}">
       ${backAction ? `<button class="back-fab" data-action="${backAction}" aria-label="Quay lại"></button>` : ""}
       <div class="brand">
         <p class="eyebrow">Simple Bodyweight Tracker</p>
@@ -844,21 +924,47 @@ function topbar(title, backAction, extraActions = "") {
 
 function renderBottomNav(active) {
   const items = [
-    { id: "home", label: "Home", icon: "⌂", action: "home" },
-    { id: "workouts", label: "Workouts", icon: "▥", action: "list" },
-    { id: "timer", label: "Timer", icon: "◷", action: "timer" },
-    { id: "profile", label: "Profile", icon: "◎", action: "accumulation" },
+    { id: "home", label: "Home", icon: "home", action: "home" },
+    { id: "workouts", label: "Workout", icon: "dumbbell", action: "list" },
+    { id: "timer", label: "Timer", icon: "timer", action: "timer" },
+    { id: "achievement", label: "Achieve", icon: "trophy", action: "achievement" },
+    { id: "profile", label: "Profile", icon: "profile", action: "accumulation" },
   ];
   return `
     <nav class="bottom-nav" aria-label="Main navigation">
       ${items.map((item) => `
         <button class="nav-item ${active === item.id ? "active" : ""}" data-action="${item.action}">
-          <span>${item.icon}</span>
+          <span>${iconSvg(item.icon)}</span>
           <strong>${item.label}</strong>
         </button>
       `).join("")}
     </nav>
   `;
+}
+
+function iconSvg(name) {
+  const icons = {
+    calendar: `<rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M8 3v4M16 3v4M4 10h16"></path>`,
+    bar_chart: `<path d="M4 19V9M10 19V5M16 19v-8M3 19h18"></path><path d="M5 9l5-4 5 6 5-7"></path>`,
+    trend_up: `<path d="M4 17c5-1 8-5 10-10"></path><path d="M12 7h6v6"></path><path d="M5 20h14"></path>`,
+    trophy: `<path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"></path><path d="M8 6H5a3 3 0 0 0 3 5M16 6h3a3 3 0 0 1-3 5M12 13v5M8 20h8"></path>`,
+    shield: `<path d="M12 3 5 6v5c0 5 3 8 7 10 4-2 7-5 7-10V6l-7-3Z"></path>`,
+    users: `<path d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3 20a5 5 0 0 1 10 0M11 20a5 5 0 0 1 10 0"></path>`,
+    lightning: `<path d="m13 2-8 12h6l-1 8 9-13h-6l0-7Z"></path>`,
+    home: `<path d="M4 11 12 4l8 7v9H6v-7h12"></path>`,
+    dumbbell: `<rect x="3" y="8" width="3" height="8" rx="1"></rect><rect x="6" y="6" width="3" height="12" rx="1"></rect><path d="M9 12h6"></path><rect x="15" y="6" width="3" height="12" rx="1"></rect><rect x="18" y="8" width="3" height="8" rx="1"></rect>`,
+    timer: `<path d="M12 8v5l3 2"></path><circle cx="12" cy="13" r="8"></circle><path d="M9 2h6M12 2v3"></path>`,
+    profile: `<circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path>`,
+  };
+  return `<svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true">${icons[name] || icons.home}</svg>`;
+}
+
+function getAchievementTier(index, total) {
+  const ratio = (index + 1) / total;
+  if (ratio >= 0.76) return "master";
+  if (ratio >= 0.51) return "pro";
+  if (ratio >= 0.26) return "intermediate";
+  return "beginner";
 }
 
 function completeExercise(category, result, historyId = null) {
@@ -1449,6 +1555,7 @@ app.addEventListener("click", (event) => {
   if (action === "home") setView({ name: "home", completion: null, editingHistoryId: null });
   if (action === "list") setView({ name: "list", completion: null, editingHistoryId: null });
   if (action === "accumulation") setView({ name: "accumulation", completion: null, editingHistoryId: null });
+  if (action === "achievement") setView({ name: "achievement", completion: null, editingHistoryId: null });
   if (action === "edit-plan") setView({ name: "plan" });
   if (action === "fixed-detail") setView({ name: "fixed", fixedItemId: button.dataset.item });
   if (action === "timer") setView({ name: "timer" });
