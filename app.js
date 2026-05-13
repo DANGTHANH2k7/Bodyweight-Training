@@ -24,6 +24,16 @@ const exerciseImageMap = {
   strength: "./images/workouts/push-up.png",
   skill_progression: "./images/workouts/handstand-push-up.png",
 };
+const inspirationImageMap = {
+  squat: "./images/inspiration/squat.png",
+  pull_up: "./images/inspiration/pull-up.png",
+  handstand_push_up: "./images/inspiration/handstand-push-up.png",
+  leg_raises: "./images/inspiration/leg-raises.png",
+  push_up: "./images/inspiration/push-up.png",
+  dip: "./images/inspiration/dip.png",
+  horizontal_pull: "./images/inspiration/horizontal-pull.png",
+  plank: "./images/inspiration/plank.png",
+};
 const exerciseMetaMap = {
   pull_up: { muscle: "Back", type: "Strength" },
   handstand_push_up: { muscle: "Shoulders", type: "Skill" },
@@ -37,13 +47,13 @@ const exerciseMetaMap = {
 };
 const BASIC_ROUTINE_ITEMS = [
   { id: "warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Chuẩn bị khớp, nhịp tim và biên độ vận động.", link: WARM_UP_LINK },
-  { id: "squat", kind: "category", categoryId: "squat", title: "Appropriate variation from squat progression", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
-  { id: "pull_up", kind: "category", categoryId: "pull_up", title: "Appropriate pull up variation", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
-  { id: "handstand_push_up", kind: "category", categoryId: "handstand_push_up", title: "Appropriate handstand push up variation", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
-  { id: "leg_raises", kind: "category", categoryId: "leg_raises", title: "Appropriate leg raises variation", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
-  { id: "push_or_dip", kind: "alternating", title: "Appropriate push up variation or dip variation", prescription: "3 sets, 4-8 reps", note: "Alternate between push up and dip every completed session." },
-  { id: "horizontal_pull", kind: "category", categoryId: "horizontal_pull", title: "Appropriate horizontal pull variation", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
-  { id: "plank", kind: "category", categoryId: "plank", title: "Appropriate plank variation", prescription: "30-60s", note: "One plank hold." },
+  { id: "squat", kind: "category", categoryId: "squat", title: "Squat variation", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
+  { id: "pull_up", kind: "category", categoryId: "pull_up", title: "Pull up variation", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
+  { id: "handstand_push_up", kind: "category", categoryId: "handstand_push_up", title: "Handstand push up variation", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
+  { id: "leg_raises", kind: "category", categoryId: "leg_raises", title: "Leg raises variation", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
+  { id: "push_or_dip", kind: "alternating", title: "Push up or dip variation", prescription: "3 sets, 4-8 reps", note: "Alternate between push up and dip every completed session." },
+  { id: "horizontal_pull", kind: "category", categoryId: "horizontal_pull", title: "Horizontal pull variation", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
+  { id: "plank", kind: "category", categoryId: "plank", title: "Plank variation", prescription: "30-60s", note: "One plank hold." },
   { id: "static_stretching", kind: "fixed", title: "Static stretching", prescription: "10 min", note: "Kết thúc buổi tập.", link: STRETCHING_LINK },
 ];
 const PROGRAM_TEMPLATES = [
@@ -257,6 +267,12 @@ const progressions = [
     ],
   },
 ];
+const progressionExerciseImageMap = progressions.reduce((map, category) => {
+  category.exercises.forEach((exercise) => {
+    map[`${category.id}:${exercise}`] = `./images/progressions/${category.id}/${slugifyImageName(exercise)}.jpg`;
+  });
+  return map;
+}, {});
 
 let state = loadState();
 let view = { name: hasSavedPlan(state) ? "home" : "plan", programId: state.programId || "beginner", draftExercises: null, categoryId: null, editingHistoryId: null, completion: null };
@@ -491,28 +507,57 @@ function renderTrack() {
   const completedEntry = getVisibleTodayEntries().find((entry) => entry.category === category.id && entry.exerciseName === exercise)
     || getVisibleTodayEntries().find((entry) => entry.category === category.id);
   const initial = historyItem ? historyItem.result : completedEntry ? completedEntry.result : target;
-  const trackAction = completedEntry && !historyItem
-    ? `<button class="btn card-undo-button" type="button" data-action="undo-exercise" data-entry="${completedEntry.id}">Undo</button>`
-    : `<button class="btn primary" type="submit">${historyItem ? "Lưu chỉnh sửa" : "Hoàn thành"}</button>`;
+  const isCompletedView = Boolean(completedEntry && !historyItem);
+  const imageKey = getExerciseImageKey(category, exercise);
+  const exerciseImageUrl = exerciseImageMap[imageKey] || exerciseImageMap.strength;
+  const progressionImageUrl = getProgressionExerciseImage(category, exercise);
+  const inspirationImageUrl = inspirationImageMap[category.id] || inspirationImageMap.strength || exerciseImageUrl;
+  const completedActions = isCompletedView
+    ? `
+      <div class="split-action">
+        <button class="btn split-undo" type="button" data-action="undo-exercise" data-entry="${completedEntry.id}">Undo</button>
+        <button class="btn split-continue" type="button" data-action="list">Tiếp tục tập</button>
+      </div>
+    `
+    : "";
+  const inputPanel = `
+    <form class="panel form" data-form="track" data-category="${category.id}" data-history-id="${view.editingHistoryId || ""}">
+      <p class="eyebrow">${historyItem ? "Nhập lần gần nhất" : "Nhập kết quả"}</p>
+      ${category.type === "seconds" ? renderSecondsInput(Number(initial || PLANK_START)) : renderRepInputs(initial)}
+      <button class="btn primary" type="submit">${historyItem ? "Lưu chỉnh sửa" : "Hoàn thành"}</button>
+    </form>
+  `;
+  const completedPanel = `
+    <div class="panel completed-track-panel">
+      <div class="inspiration-frame" style="--inspiration-image:url('${inspirationImageUrl}')">
+        <span class="inspiration-overlay"></span>
+        <span class="inspiration-copy">
+          <span class="eyebrow">Hoàn thành hôm nay</span>
+          <strong>${escapeHtml(exercise)}</strong>
+          <span>${formatResult(completedEntry?.result, category.type)}</span>
+        </span>
+      </div>
+      ${completedActions}
+    </div>
+  `;
 
   app.innerHTML = `
     <section class="screen">
       ${topbar(category.title, "list")}
-      <div class="panel">
-        <p class="eyebrow">Bài hiện tại</p>
-        <h2>${escapeHtml(exercise)}</h2>
-        <div class="summary-grid">
-          <div class="metric"><span>Mục tiêu hôm nay</span><strong>${formatResult(target, category.type)}</strong></div>
-          <div class="metric"><span>Lần gần nhất</span><strong>${formatResult(progress.lastResult, category.type)}</strong></div>
-          <div class="metric"><span>Mục tiêu lên bài</span><strong>${formatGoal(category.type)}</strong></div>
+      ${isCompletedView ? "" : `<div class="panel track-overview">
+        <div class="track-overview-main">
+          <p class="eyebrow">Bài hiện tại</p>
+          <h2>${escapeHtml(exercise)}</h2>
+          <div class="summary-grid vertical">
+            <div class="metric"><span>Mục tiêu hôm nay</span><strong>${formatResult(target, category.type)}</strong></div>
+            <div class="metric"><span>Lần gần nhất</span><strong>${formatResult(progress.lastResult, category.type)}</strong></div>
+            <div class="metric"><span>Mục tiêu lên bài</span><strong>${formatGoal(category.type)}</strong></div>
+          </div>
+          <a class="btn guide-button" href="${category.link}" target="_blank" rel="noreferrer">Xem hướng dẫn</a>
         </div>
-        <a class="btn guide-button" href="${category.link}" target="_blank" rel="noreferrer">Xem hướng dẫn</a>
-      </div>
-      <form class="panel form" data-form="track" data-category="${category.id}" data-history-id="${view.editingHistoryId || ""}">
-        <p class="eyebrow">${historyItem ? "Nhập lần gần nhất" : "Nhập kết quả"}</p>
-        ${category.type === "seconds" ? renderSecondsInput(Number(initial || PLANK_START)) : renderRepInputs(initial)}
-        ${trackAction}
-      </form>
+        <div class="track-image" style="--track-image:url('${progressionImageUrl}'); --track-fallback:url('${exerciseImageUrl}')" aria-hidden="true"></div>
+      </div>`}
+      ${isCompletedView ? completedPanel : inputPanel}
       ${renderBottomNav("workouts")}
     </section>
   `;
@@ -699,15 +744,15 @@ function renderHistoryItem(item) {
 
 function topbar(title, backAction, extraActions = "") {
   return `
-    <div class="topbar">
+    <div class="topbar ${backAction ? "with-back" : ""}">
+      ${backAction ? `<button class="back-fab" data-action="${backAction}" aria-label="Quay lại">‹</button>` : ""}
       <div class="brand">
         <p class="eyebrow">Simple Bodyweight Tracker</p>
         <h1>${escapeHtml(title)}</h1>
       </div>
-      <div class="topbar-actions">
+      ${extraActions ? `<div class="topbar-actions">
         ${extraActions}
-        ${backAction ? `<button class="btn ghost" data-action="${backAction}">Quay lại</button>` : ""}
-      </div>
+      </div>` : ""}
     </div>
   `;
 }
@@ -876,7 +921,7 @@ function normalizeRoutineItems(items, programId = "basic") {
     const saved = source.find((item) => item && item.id === required.id) || {};
     return {
       ...required,
-      title: String(saved.title || required.title).trim() || required.title,
+      title: required.title,
       prescription: String(saved.prescription || required.prescription).trim() || required.prescription,
       note: String(saved.note || required.note).trim(),
     };
@@ -985,7 +1030,9 @@ function undoExerciseCompletion(entryId) {
   state.history = state.history.filter((item) => item.id !== entryId);
   recomputeProgressFromHistory(entry.category);
   saveState();
-  setView({ name: "list" });
+  setView(view.name === "track"
+    ? { name: "track", categoryId: entry.category, editingHistoryId: null, completion: null }
+    : { name: "list" });
 }
 
 function recomputeProgressFromHistory(categoryId) {
@@ -1048,6 +1095,20 @@ function getExerciseImageKey(category, exerciseName) {
   if (category.id === "horizontal_pull") return "horizontal_pull";
   if (category.id === "leg_raises") return "leg_raises";
   return category.id;
+}
+
+function getProgressionExerciseImage(category, exerciseName) {
+  return progressionExerciseImageMap[`${category.id}:${exerciseName}`]
+    || `./images/progressions/${category.id}/${slugifyImageName(exerciseName)}.jpg`;
+}
+
+function slugifyImageName(value) {
+  return String(value)
+    .toLowerCase()
+    .replaceAll("&", " and ")
+    .replaceAll("+", " plus ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function getExerciseMeta(category, exerciseName) {
@@ -1180,7 +1241,7 @@ function renderWorkoutRow(item, index) {
         <span class="card-overlay"></span>
         <span class="row-main">
           <span class="card-kicker">${escapeHtml(getFixedItemLabel(item))}</span>
-          <strong class="card-title">${number} ${escapeHtml(item.title)}</strong>
+          <strong class="card-title">${escapeHtml(item.title)}</strong>
           <span class="row-meta">${escapeHtml(item.note)}</span>
           ${completedEntry ? `<span class="done-line">Hoàn thành hôm nay</span>` : ""}
         </span>
