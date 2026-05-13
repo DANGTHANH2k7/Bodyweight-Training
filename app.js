@@ -7,6 +7,34 @@ const PLANK_INCREMENT = 5;
 const DEFAULT_PLAN_LABEL = "Complete beginner routine";
 const WARM_UP_LINK = "http://www.startbodyweight.com/p/simple-dynamic-warm-up.html";
 const STRETCHING_LINK = "http://www.startbodyweight.com/p/simple-static-stretching-routine.html";
+const exerciseImageMap = {
+  pull_up: "/images/workouts/pull-up.png",
+  handstand_push_up: "/images/workouts/handstand-push-up.png",
+  leg_raises: "/images/workouts/leg-raises.png",
+  push_up: "/images/workouts/push-up.png",
+  dips: "/images/workouts/dips.png",
+  horizontal_pull: "/images/workouts/horizontal-row.png",
+  plank: "/images/workouts/plank.png",
+  pistol_squat: "/images/workouts/squat.png",
+  squat: "/images/workouts/squat.png",
+  warm_up: "/images/workouts/warm-up.png",
+  stretching: "/images/workouts/stretching.png",
+  mobility: "/images/workouts/warm-up.png",
+  core: "/images/workouts/leg-raises.png",
+  strength: "/images/workouts/push-up.png",
+  skill_progression: "/images/workouts/handstand-push-up.png",
+};
+const exerciseMetaMap = {
+  pull_up: { muscle: "Back", type: "Strength" },
+  handstand_push_up: { muscle: "Shoulders", type: "Skill" },
+  leg_raises: { muscle: "Core", type: "Core" },
+  push_up: { muscle: "Chest", type: "Strength" },
+  dip: { muscle: "Triceps", type: "Strength" },
+  horizontal_pull: { muscle: "Back", type: "Strength" },
+  plank: { muscle: "Core", type: "Core" },
+  squat: { muscle: "Legs", type: "Strength" },
+  fixed: { muscle: "Mobility", type: "Mobility" },
+};
 const BASIC_ROUTINE_ITEMS = [
   { id: "warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Chuẩn bị khớp, nhịp tim và biên độ vận động.", link: WARM_UP_LINK },
   { id: "squat", kind: "category", categoryId: "squat", title: "Appropriate variation from squat progression", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
@@ -232,6 +260,8 @@ const progressions = [
 
 let state = loadState();
 let view = { name: hasSavedPlan(state) ? "home" : "plan", programId: state.programId || "beginner", draftExercises: null, categoryId: null, editingHistoryId: null, completion: null };
+let timerState = { mode: "rest", duration: 60, remaining: 60, running: false, endsAt: null };
+let timerTick = null;
 
 const app = document.querySelector("#app");
 
@@ -253,6 +283,7 @@ function defaultState() {
     programId: "beginner",
     routineItems: createRoutineItems("beginner"),
     nextAlternatingSlot: "push_up",
+    completionResetAt: "",
     currentExercises,
     progress,
     history: [],
@@ -278,9 +309,13 @@ function normalizeState(input) {
     programId: getProgramTemplate(input.programId || "beginner").id,
     routineItems: normalizeRoutineItems(input.routineItems, input.programId || "beginner"),
     nextAlternatingSlot: input.nextAlternatingSlot === "dip" ? "dip" : "push_up",
+    completionResetAt: isTodayTimestamp(input.completionResetAt || input.completionResetDate) ? (input.completionResetAt || input.completionResetDate) : "",
     currentExercises: { ...base.currentExercises, ...(input.currentExercises || {}) },
     progress: { ...base.progress, ...(input.progress || {}) },
-    history: Array.isArray(input.history) ? input.history : [],
+    history: Array.isArray(input.history) ? input.history.map((item) => ({
+      ...item,
+      completedAt: item.completedAt || `${item.date || todayIso()}T00:00:00.000Z`,
+    })) : [],
   };
 
   progressions.forEach((category) => {
@@ -323,6 +358,7 @@ function render() {
   if (view.name === "track") renderTrack();
   if (view.name === "complete") renderCompletion();
   if (view.name === "accumulation") renderAccumulation();
+  if (view.name === "timer") renderTimer();
   if (view.name === "home") renderHome();
 }
 
@@ -359,6 +395,7 @@ function renderPlan() {
         </div>
         <button class="btn primary" type="submit">Lưu plan</button>
       </form>
+      ${hasSavedPlan(state) ? renderBottomNav("profile") : ""}
     </section>
   `;
 }
@@ -379,22 +416,28 @@ function renderHome() {
             <div class="actions">
               <button class="btn primary" data-action="list">Bắt đầu buổi tập</button>
               <button class="btn" data-action="accumulation">Tích lũy</button>
-              <button class="btn" data-action="edit-plan">Sửa plan</button>
             </div>
           </div>
         </div>
       </div>
+      ${renderBottomNav("home")}
     </section>
   `;
 }
 
 function renderExerciseList() {
+  const hasVisibleCompletions = getVisibleTodayEntries().length > 0;
+  const canUndoReset = isTodayTimestamp(state.completionResetAt);
   app.innerHTML = `
     <section class="screen">
-      ${topbar("Chọn bài tập", "home")}
+      ${topbar("Chọn bài tập", "home", `
+        <button class="btn small" data-action="reset-today" ${hasVisibleCompletions ? "" : "disabled"}>Reset</button>
+        <button class="btn small" data-action="undo-reset" ${canUndoReset ? "" : "disabled"}>Undo</button>
+      `)}
       <div class="list">
         ${state.routineItems.map((item, index) => renderWorkoutRow(item, index)).join("")}
       </div>
+      ${renderBottomNav("workouts")}
     </section>
   `;
 }
@@ -423,13 +466,14 @@ function renderTrack() {
           <div class="metric"><span>Lần gần nhất</span><strong>${formatResult(progress.lastResult, category.type)}</strong></div>
           <div class="metric"><span>Mục tiêu lên bài</span><strong>${formatGoal(category.type)}</strong></div>
         </div>
-        <a class="link" href="${category.link}" target="_blank" rel="noreferrer">Xem hướng dẫn</a>
+        <a class="btn guide-button" href="${category.link}" target="_blank" rel="noreferrer">Xem hướng dẫn</a>
       </div>
       <form class="panel form" data-form="track" data-category="${category.id}" data-history-id="${view.editingHistoryId || ""}">
-        <p class="eyebrow">Nhập kết quả</p>
+        <p class="eyebrow">${historyItem ? "Nhập lần gần nhất" : "Nhập kết quả"}</p>
         ${category.type === "seconds" ? renderSecondsInput(Number(initial || PLANK_START)) : renderRepInputs(initial)}
         <button class="btn primary" type="submit">${historyItem ? "Lưu chỉnh sửa" : "Hoàn thành"}</button>
       </form>
+      ${renderBottomNav("workouts")}
     </section>
   `;
 }
@@ -495,6 +539,7 @@ function renderCompletion() {
           </div>
         `}
       </div>
+      ${renderBottomNav("workouts")}
     </section>
   `;
 }
@@ -504,10 +549,17 @@ function renderAccumulation() {
   app.innerHTML = `
     <section class="screen">
       ${topbar("Tích lũy", "home")}
+      <div class="panel profile-plan">
+        <p class="eyebrow">Plan hiện tại</p>
+        <h2>${escapeHtml(getPlanLabel())}</h2>
+        <p class="plan-text">${escapeHtml(formatRoutineSummary())}</p>
+        <button class="btn primary" data-action="edit-plan">Sửa plan</button>
+      </div>
       <div class="list">
         ${progressions.map((category) => {
           const progress = state.progress[category.id];
           const ready = isReadyToAdvance(category);
+          const latestEntry = getLatestHistoryEntry(category.id);
           return `
             <div class="panel">
               <div class="topbar">
@@ -523,6 +575,7 @@ function renderAccumulation() {
                 <div class="metric"><span>Cần đạt</span><strong>${formatGoal(category.type)}</strong></div>
               </div>
               ${ready && getNextExercise(category) ? `<p class="notice">Gợi ý: chuyển sang ${escapeHtml(getNextExercise(category))}</p>` : ""}
+              ${latestEntry ? `<button class="btn" data-action="edit-history" data-history-id="${latestEntry.id}">Sửa lần gần nhất</button>` : ""}
             </div>
           `;
         }).join("")}
@@ -531,32 +584,150 @@ function renderAccumulation() {
         <h2>Lịch sử gần nhất</h2>
         ${recent ? renderHistoryItem(recent) : `<p class="muted">Chưa có buổi tập nào được lưu.</p>`}
       </div>
+      ${renderBottomNav("profile")}
     </section>
   `;
 }
 
+function renderTimer() {
+  const modeConfig = getTimerModeConfig(timerState.mode);
+  const progress = timerState.duration ? 1 - (timerState.remaining / timerState.duration) : 0;
+  const isDone = timerState.remaining <= 0;
+  app.innerHTML = `
+    <section class="screen timer-screen">
+      ${topbar("Bấm giờ", "home")}
+      <div class="timer-mode-tabs">
+        <button class="timer-mode ${timerState.mode === "rest" ? "active rest" : ""}" data-action="timer-mode" data-mode="rest">REST</button>
+        <button class="timer-mode ${timerState.mode === "break" ? "active break" : ""}" data-action="timer-mode" data-mode="break">BREAK</button>
+      </div>
+      <div class="timer-watch ${timerState.mode}" style="--timer-progress:${Math.round(progress * 360)}deg; --timer-accent:${modeConfig.accent};">
+        ${isDone ? `
+          <p class="eyebrow">BACK TO WORK</p>
+          <h1>NEXT SET</h1>
+          <p class="muted">Next exercise is ready</p>
+          <button class="btn primary pulse" data-action="timer-mode" data-mode="rest">START NEXT SET</button>
+        ` : `
+          <p class="eyebrow">${modeConfig.title}</p>
+          <div class="timer-ring">
+            <div class="timer-time">${formatTimer(timerState.remaining)}</div>
+            <span>${modeConfig.subtitle}</span>
+          </div>
+          <div class="timer-actions">
+            <button class="timer-play" data-action="timer-toggle">${timerState.running ? "PAUSE" : "PLAY"}</button>
+            <button class="btn small" data-action="timer-reset">Reset</button>
+            ${timerState.mode === "break" ? `<button class="btn small" data-action="timer-skip">Skip Break</button>` : ""}
+          </div>
+        `}
+      </div>
+      ${renderBottomNav("timer")}
+    </section>
+  `;
+}
+
+function getTimerModeConfig(mode) {
+  if (mode === "break") return { title: "BREAK TIME", subtitle: "Take a short break", duration: 180, accent: "#31c5ff" };
+  return { title: "REST TIME", subtitle: "Rest between sets", duration: 60, accent: "#ff5a00" };
+}
+
+function setTimerMode(mode) {
+  const config = getTimerModeConfig(mode);
+  stopTimer();
+  timerState = { mode, duration: config.duration, remaining: config.duration, running: false, endsAt: null };
+  setView({ name: "timer" });
+}
+
+function toggleTimer() {
+  if (timerState.remaining <= 0) setTimerMode(timerState.mode);
+  if (timerState.running) {
+    timerState.remaining = Math.max(0, Math.ceil((timerState.endsAt - Date.now()) / 1000));
+    stopTimer();
+  } else {
+    timerState.running = true;
+    timerState.endsAt = Date.now() + (timerState.remaining * 1000);
+    startTimerTick();
+  }
+  renderTimer();
+}
+
+function resetTimer() {
+  const config = getTimerModeConfig(timerState.mode);
+  stopTimer();
+  timerState = { mode: timerState.mode, duration: config.duration, remaining: config.duration, running: false, endsAt: null };
+  renderTimer();
+}
+
+function skipTimer() {
+  stopTimer();
+  timerState = { ...timerState, remaining: 0, running: false, endsAt: null };
+  renderTimer();
+}
+
+function startTimerTick() {
+  clearInterval(timerTick);
+  timerTick = setInterval(() => {
+    timerState.remaining = Math.max(0, Math.ceil((timerState.endsAt - Date.now()) / 1000));
+    if (timerState.remaining <= 0) stopTimer();
+    if (view.name === "timer") renderTimer();
+  }, 250);
+}
+
+function stopTimer() {
+  clearInterval(timerTick);
+  timerTick = null;
+  timerState.running = false;
+}
+
+function formatTimer(totalSeconds) {
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+  return `${minutes}:${seconds}`;
+}
+
 function renderHistoryItem(item) {
   const category = getCategory(item.category);
+  const type = category ? category.type : "fixed";
   return `
     <div class="history-row">
       <span>
         <strong>${escapeHtml(item.exerciseName)}</strong><br />
-        <span class="muted">${formatDate(item.date)} · ${formatResult(item.result, category.type)}</span>
+        <span class="muted">${formatDate(item.date)} · ${formatResult(item.result, type)}</span>
       </span>
-      <button class="btn" data-action="edit-history" data-history-id="${item.id}">Sửa</button>
+      ${category ? `<button class="btn" data-action="edit-history" data-history-id="${item.id}">Sửa</button>` : ""}
     </div>
   `;
 }
 
-function topbar(title, backAction) {
+function topbar(title, backAction, extraActions = "") {
   return `
     <div class="topbar">
       <div class="brand">
         <p class="eyebrow">Simple Bodyweight Tracker</p>
         <h1>${escapeHtml(title)}</h1>
       </div>
-      <button class="btn ghost" data-action="${backAction}">Quay lại</button>
+      <div class="topbar-actions">
+        ${extraActions}
+        <button class="btn ghost" data-action="${backAction}">Quay lại</button>
+      </div>
     </div>
+  `;
+}
+
+function renderBottomNav(active) {
+  const items = [
+    { id: "home", label: "Home", icon: "⌂", action: "home" },
+    { id: "workouts", label: "Workouts", icon: "▥", action: "list" },
+    { id: "timer", label: "Timer", icon: "◷", action: "timer" },
+    { id: "profile", label: "Profile", icon: "◎", action: "accumulation" },
+  ];
+  return `
+    <nav class="bottom-nav" aria-label="Main navigation">
+      ${items.map((item) => `
+        <button class="nav-item ${active === item.id ? "active" : ""}" data-action="${item.action}">
+          <span>${item.icon}</span>
+          <strong>${item.label}</strong>
+        </button>
+      `).join("")}
+    </nav>
   `;
 }
 
@@ -564,20 +735,11 @@ function completeExercise(category, result, historyId = null) {
   const exerciseName = getCurrentExercise(category);
   const existingHistory = historyId ? state.history.find((item) => item.id === historyId) : null;
   const ready = hasReachedGoal(category, result);
-  const nextTarget = ready
-    ? result
-    : category.type === "seconds"
-      ? nextSecondsTarget(result, state.progress[category.id].nextTarget)
-      : nextRepTarget(result, state.progress[category.id].nextTarget);
-
-  state.progress[category.id] = {
-    lastResult: Array.isArray(result) ? [...result] : result,
-    nextTarget: Array.isArray(nextTarget) ? [...nextTarget] : nextTarget,
-  };
 
   const historyEntry = {
     id: historyId || crypto.randomUUID(),
     date: existingHistory ? existingHistory.date : todayIso(),
+    completedAt: existingHistory ? existingHistory.completedAt : new Date().toISOString(),
     category: category.id,
     exerciseIndex: existingHistory ? existingHistory.exerciseIndex : state.currentExercises[category.id],
     exerciseName: existingHistory ? existingHistory.exerciseName : exerciseName,
@@ -592,6 +754,8 @@ function completeExercise(category, result, historyId = null) {
       state.nextAlternatingSlot = category.id === "push_up" ? "dip" : "push_up";
     }
   }
+
+  recomputeProgressFromHistory(category.id);
 
   saveState();
   setView({
@@ -623,13 +787,8 @@ function nextRepTarget(result, currentTarget) {
   const sanitizedResult = sanitizeRepArray(result);
   const target = sanitizeRepArray(currentTarget);
   if (!meetsOrExceeds(sanitizedResult, target)) return target;
-  if (meetsOrExceeds(sanitizedResult, REP_GOAL)) return REP_GOAL;
-
-  const next = [...target];
-  const lowest = Math.min(...next.filter((value) => value < REP_GOAL[0]));
-  const index = next.findIndex((value) => value === lowest);
-  if (index !== -1) next[index] += 1;
-  return next;
+  const normalized = normalizeRepResult(sanitizedResult);
+  return incrementRepTarget(normalized);
 }
 
 function nextSecondsTarget(result, currentTarget) {
@@ -638,6 +797,39 @@ function nextSecondsTarget(result, currentTarget) {
   if (achieved < target) return target;
   if (achieved >= PLANK_GOAL) return PLANK_GOAL;
   return Math.min(PLANK_GOAL, target + PLANK_INCREMENT);
+}
+
+function getRepTargetSequence() {
+  const sequence = [];
+  const target = [...REP_START];
+  sequence.push([...target]);
+
+  while (!meetsOrExceeds(target, REP_GOAL)) {
+    const lowest = Math.min(...target.filter((value) => value < REP_GOAL[0]));
+    const index = target.findIndex((value) => value === lowest);
+    target[index] += 1;
+    sequence.push([...target]);
+  }
+
+  return sequence;
+}
+
+function normalizeRepResult(result) {
+  const capped = sanitizeRepArray(result).map((value) => Math.min(value, REP_GOAL[0]));
+  const normalized = [...capped];
+
+  for (let index = 1; index < normalized.length; index += 1) {
+    if (normalized[index] > normalized[index - 1]) normalized[index] = normalized[index - 1];
+  }
+
+  return normalized;
+}
+
+function incrementRepTarget(target) {
+  const next = sanitizeRepArray(target).map((value) => Math.min(value, REP_GOAL[0]));
+  const index = next.findIndex((value) => value < REP_GOAL[0]);
+  if (index !== -1) next[index] += 1;
+  return next;
 }
 
 function hasReachedGoal(category, result) {
@@ -729,6 +921,100 @@ function getProgramGuidanceLinks(program) {
   return links;
 }
 
+function getTodayEntries() {
+  const today = todayIso();
+  return state.history.filter((item) => item.date === today);
+}
+
+function getLatestHistoryEntry(categoryId) {
+  return state.history.find((item) => item.category === categoryId) || null;
+}
+
+function getVisibleTodayEntries() {
+  const resetTime = Date.parse(state.completionResetAt || "");
+  return getTodayEntries().filter((item) => {
+    if (!Number.isFinite(resetTime)) return true;
+    return Date.parse(item.completedAt || `${item.date}T00:00:00.000Z`) > resetTime;
+  });
+}
+
+function resetTodayCompletions() {
+  if (!getVisibleTodayEntries().length) return;
+  state.completionResetAt = new Date().toISOString();
+  saveState();
+  setView({ name: "list" });
+}
+
+function undoTodayReset() {
+  if (!isTodayTimestamp(state.completionResetAt)) return;
+  state.completionResetAt = "";
+  saveState();
+  setView({ name: "list" });
+}
+
+function setAlternatingSlot(categoryId) {
+  if (categoryId !== "push_up" && categoryId !== "dip") return;
+  state.nextAlternatingSlot = categoryId;
+  saveState();
+  setView({ name: "list" });
+}
+
+function toggleFixedCompletion(itemId, title, prescription) {
+  const existing = getVisibleTodayEntries().find((item) => item.kind === "fixed" && item.itemId === itemId);
+  if (existing) return;
+  state.history = [{
+    id: crypto.randomUUID(),
+    date: todayIso(),
+    completedAt: new Date().toISOString(),
+    kind: "fixed",
+    itemId,
+    category: "fixed",
+    exerciseIndex: 0,
+    exerciseName: title,
+    result: prescription,
+  }, ...state.history];
+  saveState();
+  setView({ name: "list" });
+}
+
+function undoFixedCompletion(entryId) {
+  const entry = state.history.find((item) => item.id === entryId);
+  if (!entry || entry.kind !== "fixed") return;
+  state.history = state.history.filter((item) => item.id !== entryId);
+  saveState();
+  setView({ name: "list" });
+}
+
+function undoExerciseCompletion(entryId) {
+  const entry = state.history.find((item) => item.id === entryId);
+  if (!entry || entry.kind === "fixed") return;
+  state.history = state.history.filter((item) => item.id !== entryId);
+  recomputeProgressFromHistory(entry.category);
+  saveState();
+  setView({ name: "list" });
+}
+
+function recomputeProgressFromHistory(categoryId) {
+  const category = getCategory(categoryId);
+  if (!category) return;
+  const latest = state.history.find((item) => item.category === categoryId && item.kind !== "fixed");
+  if (!latest) {
+    state.progress[categoryId] = category.type === "seconds"
+      ? { lastResult: null, nextTarget: PLANK_START }
+      : { lastResult: null, nextTarget: [...REP_START] };
+    return;
+  }
+
+  const result = latest.result;
+  const startTarget = category.type === "seconds" ? PLANK_START : REP_START;
+  state.progress[categoryId] = {
+    lastResult: Array.isArray(result) ? [...result] : result,
+    nextTarget: category.type === "seconds"
+      ? nextSecondsTarget(result, startTarget)
+      : nextRepTarget(result, startTarget),
+  };
+}
+
 function renderGuidanceLinks(program) {
   return `
     <div class="panel guide-panel">
@@ -755,6 +1041,48 @@ function getRoutineCategory(item) {
   if (item.kind === "alternating") return getCategory(state.nextAlternatingSlot);
   if (item.kind === "category") return getCategory(item.categoryId);
   return null;
+}
+
+function getExerciseImageKey(category, exerciseName) {
+  const name = exerciseName.toLowerCase();
+  if (name.includes("pistol") || name.includes("one-legged") || name.includes("one legged")) return "pistol_squat";
+  if (category.id === "dip") return "dips";
+  if (category.id === "horizontal_pull") return "horizontal_pull";
+  if (category.id === "leg_raises") return "leg_raises";
+  return category.id;
+}
+
+function getExerciseMeta(category, exerciseName) {
+  if (category.id === "squat" && getExerciseImageKey(category, exerciseName) === "pistol_squat") return { muscle: "Legs", type: "Skill Progression" };
+  return exerciseMetaMap[category.id] || exerciseMetaMap.fixed;
+}
+
+function getExerciseDifficulty(category) {
+  const index = state.currentExercises[category.id] || 0;
+  if (index <= 2) return "Beginner";
+  if (index <= 7) return "Intermediate";
+  return "Advanced";
+}
+
+function getFixedItemImage(item) {
+  const text = `${item.id} ${item.title} ${item.prescription}`.toLowerCase();
+  if (text.includes("stretch")) return exerciseImageMap.stretching;
+  if (text.includes("warm")) return exerciseImageMap.warm_up;
+  return exerciseImageMap.mobility;
+}
+
+function getShortCategoryLabel(categoryId) {
+  const labels = {
+    squat: "Squat",
+    pull_up: "Pull Up",
+    handstand_push_up: "Handstand Push Up",
+    leg_raises: "Leg Raises",
+    push_up: "Push Up",
+    dip: "Dips",
+    horizontal_pull: "Horizontal Row",
+    plank: "Plank",
+  };
+  return labels[categoryId] || "Workout";
 }
 
 function renderRoutineSetupItem(item, draftExercises, program) {
@@ -839,14 +1167,25 @@ function renderWorkoutRow(item, index) {
   const number = `${index + 1}.`;
 
   if (!category) {
+    const completedEntry = getVisibleTodayEntries().find((entry) => entry.kind === "fixed" && entry.itemId === item.id);
+    const completedClass = completedEntry ? " completed" : "";
+    const imageUrl = getFixedItemImage(item);
     return `
-      <div class="exercise-row routine-static">
+      <div class="exercise-row workout-card routine-static${completedClass}" style="--card-image:url('${imageUrl}')">
+        <span class="card-overlay"></span>
         <span class="row-main">
-          <strong>${number} ${escapeHtml(item.title)}</strong>
+          <span class="card-kicker">MOBILITY</span>
+          <strong class="card-title">${number} ${escapeHtml(item.title)}</strong>
           <span class="row-meta">${escapeHtml(item.note)}</span>
-          ${item.link ? `<a class="link" href="${item.link}" target="_blank" rel="noreferrer">Xem hướng dẫn</a>` : ""}
+          ${completedEntry ? `<span class="done-line">Hoàn thành hôm nay</span>` : ""}
+          ${item.link ? `<a class="btn guide-button" href="${item.link}" target="_blank" rel="noreferrer">Xem hướng dẫn</a>` : ""}
         </span>
-        <span class="target-pill">${escapeHtml(item.prescription)}</span>
+        <span class="row-actions">
+          <span class="target-pill">${escapeHtml(item.prescription)}</span>
+          ${completedEntry
+            ? `<button class="btn small" data-action="undo-fixed" data-entry="${completedEntry.id}">Undo</button>`
+            : `<button class="btn small primary" data-action="toggle-fixed" data-item="${item.id}" data-title="${escapeHtml(item.title)}" data-prescription="${escapeHtml(item.prescription)}">Check done</button>`}
+        </span>
       </div>
     `;
   }
@@ -854,16 +1193,44 @@ function renderWorkoutRow(item, index) {
   const exercise = getCurrentExercise(category);
   const progress = state.progress[category.id];
   const ready = isReadyToAdvance(category);
+  const completedEntries = item.kind === "alternating"
+    ? getVisibleTodayEntries().filter((entry) => entry.category === "push_up" || entry.category === "dip")
+    : getVisibleTodayEntries().filter((entry) => entry.category === category.id);
+  const completedClass = completedEntries.length ? " completed" : "";
+  const imageKey = getExerciseImageKey(category, exercise);
+  const meta = getExerciseMeta(category, exercise);
+  const difficulty = getExerciseDifficulty(category);
+  const imageUrl = exerciseImageMap[imageKey] || exerciseImageMap.strength;
   const alternatingNote = item.kind === "alternating" ? `Luân phiên: hôm nay ${category.id === "push_up" ? "push up" : "dip"}` : item.note;
   return `
-    <button class="exercise-row" data-action="track" data-category="${category.id}">
+    <button class="exercise-row workout-card${completedClass}" data-action="track" data-category="${category.id}" style="--card-image:url('${imageUrl}')">
+      <span class="card-overlay"></span>
       <span class="row-main">
-        <strong>${number} ${escapeHtml(item.title)}</strong>
+        <span class="card-kicker">${escapeHtml(meta.type)}</span>
+        <strong class="card-title">${escapeHtml(exercise)}</strong>
         <span class="row-meta">${escapeHtml(alternatingNote)}</span>
-        <span class="row-meta">Hiện tại: ${escapeHtml(exercise)}</span>
+        <span class="card-stats">
+          <span>${escapeHtml(meta.muscle)}</span>
+          <span>${formatResult(progress.nextTarget, category.type)}</span>
+          <span>${difficulty}</span>
+        </span>
+        ${item.kind === "alternating" ? `
+          <span class="inline-actions">
+            <span class="mini-toggle ${category.id === "push_up" ? "selected" : ""}" data-action="set-alternating" data-category="push_up">Push up</span>
+            <span class="mini-toggle ${category.id === "dip" ? "selected" : ""}" data-action="set-alternating" data-category="dip">Dip</span>
+          </span>
+        ` : ""}
+        ${completedEntries.map((entry) => {
+          const entryCategory = getCategory(entry.category);
+          return `<span class="done-line">Hoàn thành hôm nay: ${escapeHtml(entry.exerciseName)} - ${formatResult(entry.result, entryCategory.type)}</span>`;
+        }).join("")}
         ${ready ? `<span class="row-meta">Gợi ý: chuyển sang ${escapeHtml(getNextExercise(category) || "bài cuối")}</span>` : ""}
+        <span class="card-field-label">${escapeHtml(getShortCategoryLabel(category.id))}</span>
       </span>
-      <span class="${ready ? "status-pill ready" : "target-pill"}">${ready ? "Đủ lên bài" : formatResult(progress.nextTarget, category.type)}</span>
+      <span class="row-actions">
+        <span class="${ready ? "status-pill ready" : "target-pill"}">${ready ? "Đủ lên bài" : formatResult(progress.nextTarget, category.type)}</span>
+        ${completedEntries.map((entry) => `<span class="btn small" data-action="undo-exercise" data-entry="${entry.id}">Undo</span>`).join("")}
+      </span>
     </button>
   `;
 }
@@ -892,6 +1259,7 @@ function clampNumber(value, min, max) {
 
 function formatResult(result, type) {
   if (result === null || result === undefined) return type === "seconds" ? `${PLANK_START}s` : REP_START.join(",");
+  if (type === "fixed") return String(result);
   if (type === "seconds") return `${Number(result)}s`;
   return sanitizeRepArray(result).join(",");
 }
@@ -902,6 +1270,11 @@ function formatGoal(type) {
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
+}
+
+function isTodayTimestamp(value) {
+  if (!value) return false;
+  return String(value).slice(0, 10) === todayIso();
 }
 
 function formatDate(value) {
@@ -927,6 +1300,11 @@ app.addEventListener("click", (event) => {
   if (action === "list") setView({ name: "list", completion: null, editingHistoryId: null });
   if (action === "accumulation") setView({ name: "accumulation", completion: null, editingHistoryId: null });
   if (action === "edit-plan") setView({ name: "plan" });
+  if (action === "timer") setView({ name: "timer" });
+  if (action === "timer-mode") setTimerMode(button.dataset.mode);
+  if (action === "timer-toggle") toggleTimer();
+  if (action === "timer-reset") resetTimer();
+  if (action === "timer-skip") skipTimer();
   if (action === "program-option") setView({ name: "plan", programId: button.dataset.program, draftExercises: { ...state.currentExercises, ...(view.draftExercises || {}) } });
   if (action === "variation") {
     setView({
@@ -940,6 +1318,12 @@ app.addEventListener("click", (event) => {
   }
   if (action === "track") setView({ name: "track", categoryId: button.dataset.category, editingHistoryId: null });
   if (action === "advance") advanceExercise(button.dataset.category);
+  if (action === "reset-today") resetTodayCompletions();
+  if (action === "undo-reset") undoTodayReset();
+  if (action === "set-alternating") setAlternatingSlot(button.dataset.category);
+  if (action === "toggle-fixed") toggleFixedCompletion(button.dataset.item, button.dataset.title, button.dataset.prescription);
+  if (action === "undo-fixed") undoFixedCompletion(button.dataset.entry);
+  if (action === "undo-exercise") undoExerciseCompletion(button.dataset.entry);
 
   if (action === "edit-history") {
     const item = state.history.find((historyItem) => historyItem.id === button.dataset.historyId);

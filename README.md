@@ -30,6 +30,16 @@ Warm up and stretching are shown in the workout order but are not tracked in his
 
 The workout list shows either push up or dip in the alternating slot. After completing that slot, the next workout shows the other one. Push up and dip keep separate progression state and history.
 
+## UI
+
+The app uses a dark sport-tech interface with workout image cards, bottom navigation, and a timer tab for rest and break countdowns.
+
+Workout image placeholders live in:
+
+```text
+images/workouts/
+```
+
 ## Run
 
 Open `index.html` directly in a browser, or run a local static server:
