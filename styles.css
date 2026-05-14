@@ -18,19 +18,23 @@
 /* Premium dark sport-tech layer */
 :root {
   color-scheme: dark;
-  --bg: #050505;
-  --surface: #111111;
-  --ink: #f7f7f2;
-  --muted: #a0a0a0;
-  --line: rgba(255, 255, 255, 0.14);
-  --primary: #ff5a00;
-  --primary-dark: #df3d00;
-  --accent: #31c5ff;
-  --pink: #ff00aa;
-  --lime: #d9ff00;
-  --soft: rgba(255, 90, 0, 0.16);
-  --warning: rgba(217, 255, 0, 0.18);
-  --shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  --bg: #06090d;
+  --surface: #0f141b;
+  --elevated: #151c24;
+  --ink: #f5f7fa;
+  --muted: #9ca6b5;
+  --disabled: #5e6775;
+  --line: #252f3d;
+  --primary: #ff7a1a;
+  --primary-dark: #ff5c00;
+  --accent: #ff5c00;
+  --accent-glow: #ff9a4a;
+  --pink: #ff7a1a;
+  --lime: #6ee16f;
+  --soft: rgba(255, 122, 26, 0.15);
+  --warning: rgba(255, 154, 74, 0.18);
+  --radius: 12px;
+  --shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.6);
 }
 
 body {
@@ -536,11 +540,6 @@ h3 {
   letter-spacing: 0;
 }
 
-.home-plan-button {
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-}
-
 .home-hero {
   position: relative;
   overflow: hidden;
@@ -853,22 +852,6 @@ h3 {
   background: var(--primary-dark);
 }
 
-.btn.card-undo-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(5, 5, 5, 0.48);
-  color: #ffffff;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-}
-
-.btn.card-undo-button:hover {
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(5, 5, 5, 0.66);
-}
-
 .split-action {
   display: grid;
   grid-template-columns: minmax(88px, 0.36fr) minmax(0, 1fr);
@@ -1137,6 +1120,32 @@ input[readonly] {
   background: var(--soft);
 }
 
+.strength-mode-toggle {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(64px, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.strength-mode-option {
+  min-height: 38px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0 14px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 950;
+}
+
+.strength-mode-option.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #ffffff;
+}
+
 .guide-panel {
   box-shadow: none;
 }
@@ -1328,24 +1337,41 @@ input[type="number"] {
   gap: 10px;
 }
 
+.achievement-tabs {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(360px, 100%);
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(16, 24, 23, 0.82);
+}
+
+.achievement-tab {
+  min-height: 42px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 950;
+}
+
+.achievement-tab.active {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
 .achievement-legend {
-  display: grid;
-  grid-template-columns: minmax(150px, 1.2fr) repeat(4, auto);
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 14px 22px;
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 10px;
   background: rgba(16, 24, 23, 0.82);
-}
-
-.achievement-filter {
-  min-height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  color: #ffffff;
-  font-weight: 900;
 }
 
 .achievement-legend-item {
@@ -1498,6 +1524,31 @@ input[type="number"] {
   transform: scale(1.16);
 }
 
+.achievement-step.locked {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.achievement-step .line-icon {
+  width: 12px;
+  height: 12px;
+  stroke-width: 3;
+}
+
+.achievement-exercise-labels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.achievement-exercise-labels span:last-child {
+  text-align: right;
+}
+
 .achievement-tier-labels {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1513,6 +1564,153 @@ input[type="number"] {
   background: transparent;
   font-size: 2.2rem;
   line-height: 1;
+}
+
+.achievement-detail-list {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(7, 16, 15, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.achievement-detail-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--muted);
+}
+
+.achievement-detail-row:last-child {
+  border-bottom: 0;
+}
+
+.achievement-detail-row strong {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.9rem;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.achievement-detail-row.current {
+  position: relative;
+  margin: -1px 0;
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary) 18%, rgba(7, 16, 15, 0.82));
+  box-shadow: 0 0 18px rgba(255, 102, 13, 0.22);
+  color: #ffffff;
+}
+
+.achievement-detail-row.current strong {
+  color: #ffffff;
+}
+
+.achievement-detail-row.locked {
+  opacity: 0.58;
+}
+
+.achievement-detail-number {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+.achievement-detail-row.current .achievement-detail-number {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.achievement-detail-status {
+  display: grid;
+  place-items: center;
+  color: #58d46f;
+}
+
+.achievement-detail-row.locked .achievement-detail-status {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.achievement-detail-status .line-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.6;
+}
+
+.skill-list {
+  gap: 10px;
+}
+
+.skill-card {
+  grid-template-columns: 76px minmax(130px, 0.55fr) minmax(0, 1.55fr);
+}
+
+.skill-card.unlocked {
+  --tier-color: #ffc43d;
+  border-color: color-mix(in srgb, var(--tier-color) 34%, rgba(255, 255, 255, 0.09));
+}
+
+.skill-card.locked {
+  --tier-color: #8d9494;
+  opacity: 0.58;
+}
+
+.skill-lock-ring {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--tier-color);
+  border-radius: 999px;
+  color: var(--tier-color);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--tier-color) 20%, transparent);
+}
+
+.skill-lock-ring .line-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.skill-prerequisites {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skill-prerequisite {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 8px 10px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.skill-prerequisite.met {
+  border-color: color-mix(in srgb, var(--tier-color) 44%, transparent);
+  background: color-mix(in srgb, var(--tier-color) 14%, transparent);
+  color: #ffffff;
+}
+
+.skill-prerequisite .line-icon {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
 }
 
 .link {
@@ -1605,12 +1803,8 @@ input[type="number"] {
     border-bottom: 0;
   }
 
-  .achievement-legend {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .achievement-filter {
-    grid-column: 1 / -1;
+  .achievement-tabs {
+    width: 100%;
   }
 
   .achievement-card {
@@ -1644,6 +1838,23 @@ input[type="number"] {
     font-size: 0.66rem;
   }
 
+  .achievement-exercise-labels {
+    font-size: 0.7rem;
+  }
+
+  .skill-card {
+    grid-template-columns: 62px 1fr;
+  }
+
+  .skill-lock-ring {
+    width: 56px;
+    height: 56px;
+  }
+
+  .skill-prerequisites {
+    grid-column: 1 / -1;
+  }
+
   .topbar {
     align-items: flex-start;
     grid-template-columns: 1fr;
@@ -1656,6 +1867,10 @@ input[type="number"] {
   .topbar-actions {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .strength-mode-toggle {
+    width: 100%;
   }
 
   .actions,
@@ -1795,4 +2010,450 @@ textarea,
   background:
     linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: #ffffff;
+}
+
+/* Dark Premium Sport Design System */
+body {
+  background:
+    linear-gradient(135deg, rgba(255, 122, 26, 0.11), transparent 28rem),
+    radial-gradient(circle at 72% 8%, rgba(255, 154, 74, 0.12), transparent 24rem),
+    linear-gradient(180deg, #06090d 0%, #070b10 44%, #030507 100%);
+  color: var(--ink);
+  font-family: "Inter Tight", "Arial Narrow", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.screen {
+  gap: 16px;
+}
+
+.brand h1,
+.home-hero h1,
+.card-title,
+.timer-time,
+.track-header h1,
+.achievement-title-block h2 {
+  color: var(--ink);
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  font-style: italic;
+}
+
+.eyebrow,
+.card-kicker,
+.card-field-label {
+  color: var(--primary);
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.muted,
+.row-meta,
+.achievement-title-block p,
+.achievement-exercise-labels,
+.profile-plan .plan-text {
+  color: var(--muted);
+}
+
+.panel,
+.exercise-row,
+.history-row,
+.program-card,
+.routine-item,
+.metric,
+.achievement-card,
+.achievement-detail-list,
+.timer-watch,
+.track-panel,
+.timer-mode-tabs,
+.achievement-legend,
+.achievement-tabs,
+.home-trust-bar,
+.home-phone-card {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(20, 24, 30, 0.72);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+}
+
+.panel,
+.history-row,
+.program-card,
+.routine-item,
+.metric,
+.achievement-card,
+.track-panel {
+  border-radius: 16px;
+}
+
+.workout-card,
+.exercise-row.completed {
+  border: 1px solid rgba(255, 122, 26, 0.34);
+  border-radius: 16px;
+  background:
+    linear-gradient(90deg, rgba(6, 9, 13, 0.96), rgba(6, 9, 13, 0.5)),
+    linear-gradient(180deg, transparent, rgba(6, 9, 13, 0.92)),
+    var(--card-image) center / cover;
+  box-shadow:
+    0 0 0 1px rgba(255, 122, 26, 0.1),
+    0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.exercise-row.completed {
+  box-shadow:
+    0 0 0 1px rgba(255, 122, 26, 0.34),
+    0 0 18px rgba(255, 122, 26, 0.28),
+    0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.card-overlay {
+  background:
+    linear-gradient(90deg, rgba(6, 9, 13, 0.96), rgba(6, 9, 13, 0.36)),
+    linear-gradient(0deg, rgba(6, 9, 13, 0.98), transparent 58%);
+}
+
+.card-title {
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.72);
+}
+
+.btn,
+.guide-button,
+.home-cta,
+.timer-play,
+.strength-mode-option.active,
+.achievement-tab.active,
+.timer-mode.active,
+.timer-duration.active,
+.nav-item.active {
+  border-color: rgba(255, 154, 74, 0.7);
+  background:
+    linear-gradient(180deg, #ff9a4a, #ff6a00);
+  color: #11161d;
+  box-shadow:
+    0 0 0 1px rgba(255, 122, 26, 0.16),
+    0 0 18px rgba(255, 122, 26, 0.34),
+    0 8px 24px rgba(0, 0, 0, 0.6);
+  font-weight: 950;
+}
+
+.btn:not(.primary):not(.home-cta):not(.timer-play):not(.split-continue),
+.guide-link,
+.timer-mode,
+.timer-duration,
+.achievement-tab,
+.strength-mode-option,
+.variation-option,
+.mini-toggle,
+.stepper {
+  border: 1px solid var(--line);
+  background: rgba(15, 20, 27, 0.86);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.btn:disabled,
+.timer-duration:disabled {
+  color: var(--disabled);
+  opacity: 0.5;
+  box-shadow: none;
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+  border: 1px solid var(--line);
+  background: rgba(9, 13, 18, 0.95);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.45);
+  color: var(--ink);
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+  outline: 0;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(255, 122, 26, 0.25), 0 0 18px rgba(255, 122, 26, 0.25);
+}
+
+.bottom-nav {
+  border-color: rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  background: rgba(15, 20, 27, 0.82);
+  backdrop-filter: blur(12px);
+}
+
+.nav-item {
+  border-radius: 12px;
+}
+
+.nav-item.active {
+  color: #11161d;
+}
+
+.achievement-card {
+  border-color: color-mix(in srgb, var(--tier-color) 26%, rgba(255, 255, 255, 0.06));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--tier-color) 10%, transparent), transparent 44%),
+    rgba(20, 24, 30, 0.72);
+}
+
+.achievement-step.achieved,
+.achievement-detail-row.current .achievement-detail-number {
+  background:
+    linear-gradient(180deg, var(--accent-glow), var(--primary-dark));
+  color: #11161d;
+}
+
+.achievement-step.current,
+.achievement-detail-row.current {
+  border-color: var(--primary);
+  box-shadow:
+    0 0 0 1px rgba(255, 122, 26, 0.22),
+    0 0 18px rgba(255, 122, 26, 0.36);
+}
+
+.achievement-detail-row {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.achievement-detail-number,
+.achievement-step.locked {
+  background: rgba(94, 103, 117, 0.18);
+  color: var(--disabled);
+}
+
+.timer-watch {
+  border-radius: 24px;
+  background:
+    radial-gradient(circle, rgba(255, 122, 26, 0.12), transparent 15rem),
+    rgba(15, 20, 27, 0.86);
+}
+
+.timer-ring {
+  box-shadow:
+    inset 0 0 40px rgba(0, 0, 0, 0.68),
+    0 0 18px rgba(255, 122, 26, 0.28);
+}
+
+.home-hero {
+  background:
+    linear-gradient(90deg, rgba(6, 9, 13, 0.99) 0%, rgba(6, 9, 13, 0.88) 48%, rgba(6, 9, 13, 0.32) 100%),
+    linear-gradient(180deg, transparent 0%, #06090d 100%),
+    url("./images/workouts/dips.png") right center / min(52vw, 520px) auto no-repeat;
+}
+
+.home-card-icon,
+.home-trust-item span,
+.skill-lock-ring,
+.achievement-icon-ring {
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 0 18px rgba(255, 122, 26, 0.28);
+}
+
+.target-pill,
+.status-pill,
+.skill-prerequisite.met,
+.achievement-title-block p span {
+  background: rgba(255, 122, 26, 0.16);
+  color: var(--accent-glow);
+}
+
+/* Requested polish after design-system pass */
+.workout-card,
+.exercise-row.completed {
+  background:
+    linear-gradient(90deg, rgba(6, 9, 13, 0.64), rgba(6, 9, 13, 0.2)),
+    linear-gradient(0deg, rgba(6, 9, 13, 0.78), rgba(6, 9, 13, 0.12) 58%),
+    var(--card-image) center / cover;
+}
+
+.card-overlay {
+  background:
+    linear-gradient(90deg, rgba(6, 9, 13, 0.62), rgba(6, 9, 13, 0.14)),
+    linear-gradient(0deg, rgba(6, 9, 13, 0.84), transparent 62%);
+}
+
+.icon-action {
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  padding: 0;
+}
+
+.icon-action .line-icon {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.4;
+}
+
+.home-topbar,
+.brand .eyebrow {
+  display: none;
+}
+
+.achievement-card .achievement-icon-ring {
+  border-color: var(--tier-color);
+  color: var(--tier-color);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--tier-color) 34%, transparent);
+}
+
+.achievement-card .achievement-title-block p span {
+  background: color-mix(in srgb, var(--tier-color) 22%, transparent);
+  color: var(--tier-color);
+}
+
+.achievement-card .achievement-step.achieved,
+.achievement-screen .achievement-detail-row.current .achievement-detail-number {
+  background: var(--tier-color);
+  color: #07100f;
+}
+
+.achievement-card .achievement-step.current,
+.achievement-screen .achievement-detail-row.current {
+  border-color: var(--tier-color);
+  color: var(--tier-color);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--tier-color) 20%, transparent),
+    0 0 18px color-mix(in srgb, var(--tier-color) 46%, transparent);
+}
+
+.achievement-screen .achievement-detail-row.current {
+  background: color-mix(in srgb, var(--tier-color) 16%, rgba(7, 16, 15, 0.82));
+}
+
+.btn.card-reset-button {
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 0;
+  background: rgba(6, 9, 13, 0.12);
+  color: rgba(255, 255, 255, 0.62);
+  box-shadow: none;
+  backdrop-filter: blur(12px);
+}
+
+.btn.card-reset-button:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(6, 9, 13, 0.22);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.btn.card-reset-button .line-icon {
+  width: 24px;
+  height: 24px;
+  stroke-width: 3.2;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
+}
+
+.btn.card-continue-button {
+  min-height: 42px;
+  border-radius: 999px;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
+.workout-card .btn.card-continue-button {
+  background:
+    linear-gradient(180deg, #ff9a4a, #ff6a00);
+  color: #11161d;
+}
+
+.workout-card .row-actions {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 2;
+  align-self: auto;
+  max-width: calc(100% - 28px);
+  justify-content: flex-end;
+}
+
+/* Vietnamese-safe typography and glass reset control tuning. */
+body,
+button,
+input,
+textarea {
+  font-family: Arial, "Helvetica Neue", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.brand h1,
+.home-hero h1,
+.card-title,
+.timer-time,
+.track-header h1,
+.achievement-title-block h2 {
+  font-family: Arial, "Helvetica Neue", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.workout-card .row-main {
+  padding-right: 52px;
+}
+
+.btn.card-reset-button {
+  width: 38px;
+  min-width: 38px;
+  height: 38px;
+  border-color: rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.012)),
+    rgba(6, 9, 13, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 18px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(18px) saturate(1.15);
+}
+
+.btn.card-reset-button:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.02)),
+    rgba(6, 9, 13, 0.08);
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.btn.card-reset-button .line-icon {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.7;
+}
+
+.workout-card .row-actions:has(.card-continue-button) {
+  display: grid;
+  grid-template-columns: minmax(0, auto);
+}
+
+.workout-card .btn.primary.card-continue-button,
+.workout-card .btn.primary.card-continue-button:hover {
+  border-color: rgba(255, 154, 74, 0.76);
+  background:
+    linear-gradient(180deg, #ff9a4a, #ff6a00) !important;
+  color: #11161d !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 122, 26, 0.16),
+    0 0 18px rgba(255, 122, 26, 0.32),
+    0 8px 24px rgba(0, 0, 0, 0.42);
+}
+
+.guide-button,
+.guide-button:hover {
+  border-color: rgba(255, 154, 74, 0.72) !important;
+  background:
+    linear-gradient(135deg, #ff4fa3 0%, #ff7a1a 52%, #ff5c00 100%) !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 79, 163, 0.16),
+    0 0 18px rgba(255, 122, 26, 0.28),
+    0 8px 24px rgba(0, 0, 0, 0.45);
 }

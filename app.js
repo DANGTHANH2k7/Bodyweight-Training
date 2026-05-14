@@ -7,6 +7,10 @@ const PLANK_INCREMENT = 5;
 const DEFAULT_PLAN_LABEL = "Complete beginner routine";
 const WARM_UP_LINK = "http://www.startbodyweight.com/p/simple-dynamic-warm-up.html";
 const STRETCHING_LINK = "http://www.startbodyweight.com/p/simple-static-stretching-routine.html";
+const STRENGTH_MODE_ITEMS = {
+  push: new Set(["strength_push_warm_up", "strength_squat", "strength_hspu", "strength_push_up", "strength_dip", "strength_leg_raises", "strength_push_stretching"]),
+  pull: new Set(["strength_pull_warm_up", "strength_pull_up", "strength_horizontal_pull", "strength_plank", "strength_pull_stretching"]),
+};
 const exerciseImageMap = {
   pull_up: "./images/workouts/pull-up.png",
   handstand_push_up: "./images/workouts/handstand-push-up.png",
@@ -85,16 +89,18 @@ const PROGRAM_TEMPLATES = [
     summary: "2 day split, 4-5 ngày/tuần, 5x5 với nghỉ dài hơn.",
     lockedSetup: false,
     routineItems: [
-      { id: "push_day", kind: "fixed", title: "DAY 1 / DAY 4 - PUSH", prescription: "Warm up, 5x5, 3 min rest, stretches", note: "Squats, handstand push ups, push ups, dips, leg raises.", link: WARM_UP_LINK },
+      { id: "strength_push_warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Chuẩn bị khớp, nhịp tim và biên độ vận động.", link: WARM_UP_LINK },
       { id: "strength_squat", kind: "category", categoryId: "squat", title: "Squat variation", prescription: "5 sets x 5 reps", note: "Push day." },
       { id: "strength_hspu", kind: "category", categoryId: "handstand_push_up", title: "Handstand push up variation", prescription: "5 sets x 5 reps", note: "Push day." },
       { id: "strength_push_up", kind: "category", categoryId: "push_up", title: "Push up variation", prescription: "5 sets x 5 reps", note: "Push day." },
       { id: "strength_dip", kind: "category", categoryId: "dip", title: "Dip variation", prescription: "5 sets x 5 reps", note: "Push day." },
       { id: "strength_leg_raises", kind: "category", categoryId: "leg_raises", title: "Leg raises variation", prescription: "5 sets x 5 reps", note: "Push day." },
-      { id: "pull_day", kind: "fixed", title: "DAY 2 / DAY 5 - PULL", prescription: "Warm up, 5x5, 3 min rest, plank, stretches", note: "Deadlifts are noted but not tracked in this bodyweight MVP.", link: STRETCHING_LINK },
+      { id: "strength_push_stretching", kind: "fixed", title: "Static stretching", prescription: "10 min", note: "Kết thúc buổi tập.", link: STRETCHING_LINK },
+      { id: "strength_pull_warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Chuẩn bị khớp, nhịp tim và biên độ vận động.", link: WARM_UP_LINK },
       { id: "strength_pull_up", kind: "category", categoryId: "pull_up", title: "Pull up variation", prescription: "5 sets x 5 reps", note: "Pull day." },
       { id: "strength_horizontal_pull", kind: "category", categoryId: "horizontal_pull", title: "Horizontal pull variation", prescription: "5 sets x 5 reps", note: "Pull day." },
       { id: "strength_plank", kind: "category", categoryId: "plank", title: "Plank variation", prescription: "30-60s", note: "Pull day." },
+      { id: "strength_pull_stretching", kind: "fixed", title: "Static stretching", prescription: "10 min", note: "Kết thúc buổi tập.", link: STRETCHING_LINK },
     ],
   },
 ];
@@ -273,6 +279,80 @@ const progressionExerciseImageMap = progressions.reduce((map, category) => {
   });
   return map;
 }, {});
+const ADVANCED_SKILLS = [
+  {
+    id: "crow_stand",
+    title: "The crow stand",
+    prerequisites: [
+      { type: "exercise", categoryId: "handstand_push_up", exercise: "Pike push ups" },
+      { type: "exercise", categoryId: "plank", exercise: "Plank" },
+    ],
+  },
+  {
+    id: "double_elbow_levers",
+    title: "Double elbow levers",
+    prerequisites: [
+      { type: "exercise", categoryId: "plank", exercise: "Decline plank" },
+      { type: "skill", skillId: "crow_stand", label: "The crow stand" },
+    ],
+  },
+  {
+    id: "l_sits",
+    title: "L-sits",
+    prerequisites: [
+      { type: "exercise", categoryId: "leg_raises", exercise: "Hanging straight leg raises" },
+      { type: "exercise", categoryId: "dip", exercise: "Dips" },
+    ],
+  },
+  {
+    id: "dragon_flags",
+    title: "Dragon flags",
+    prerequisites: [
+      { type: "exercise", categoryId: "plank", exercise: "Leg lift plank" },
+      { type: "exercise", categoryId: "pull_up", exercise: "Pull ups" },
+      { type: "exercise", categoryId: "leg_raises", exercise: "Hanging bent leg V-raises" },
+    ],
+  },
+  {
+    id: "back_levers",
+    title: "Back levers",
+    prerequisites: [
+      { type: "exercise", categoryId: "plank", exercise: "Arm and leg lift plank" },
+      { type: "exercise", categoryId: "dip", exercise: "Legs forward dips" },
+    ],
+  },
+  {
+    id: "muscle_ups",
+    title: "Muscle ups",
+    prerequisites: [
+      { type: "exercise", categoryId: "pull_up", exercise: "Archer pull ups" },
+      { type: "exercise", categoryId: "dip", exercise: "Modified Russian dips" },
+    ],
+  },
+  {
+    id: "ab_wheel_rollouts",
+    title: "Ab wheel rollouts",
+    prerequisites: [
+      { type: "exercise", categoryId: "plank", exercise: "Wall plank" },
+      { type: "exercise", categoryId: "leg_raises", exercise: "Hanging straight leg V-raises / Toes to bar", label: "Hanging straight leg V-raises" },
+    ],
+  },
+  {
+    id: "handstands",
+    title: "Handstands",
+    prerequisites: [
+      { type: "exercise", categoryId: "handstand_push_up", exercise: "Wall handstand push ups" },
+    ],
+  },
+  {
+    id: "front_planche_rope",
+    title: "Front planche on a rope",
+    prerequisites: [
+      { type: "skill", skillId: "dragon_flags", label: "Dragon flags" },
+      { type: "exercise", categoryId: "pull_up", exercise: "Pull ups" },
+    ],
+  },
+];
 
 let state = loadState();
 let view = { name: hasSavedPlan(state) ? "home" : "plan", programId: state.programId || "beginner", draftExercises: null, categoryId: null, editingHistoryId: null, completion: null };
@@ -300,6 +380,7 @@ function defaultState() {
     planLabel: "",
     planMode: "sample",
     programId: "beginner",
+    strengthMode: "push",
     routineItems: createRoutineItems("beginner"),
     nextAlternatingSlot: "push_up",
     completionResetAt: "",
@@ -326,6 +407,7 @@ function normalizeState(input) {
     planLabel: input.planLabel || input.plan || "",
     planMode: "sample",
     programId: getProgramTemplate(input.programId || "beginner").id,
+    strengthMode: input.strengthMode === "pull" ? "pull" : "push",
     routineItems: normalizeRoutineItems(input.routineItems, input.programId || "beginner"),
     nextAlternatingSlot: input.nextAlternatingSlot === "dip" ? "dip" : "push_up",
     completionResetAt: isTodayTimestamp(input.completionResetAt || input.completionResetDate) ? (input.completionResetAt || input.completionResetDate) : "",
@@ -384,16 +466,19 @@ function render() {
 
 function renderPlan() {
   const program = getProgramTemplate(view.programId || state.programId || "beginner");
-  const routineItems = createRoutineItems(program.id);
+  const strengthMode = getStrengthMode(view.strengthMode || state.strengthMode);
+  const routineItems = getVisibleRoutineItems(createRoutineItems(program.id), program.id, strengthMode);
   const draftExercises = { ...state.currentExercises, ...(view.draftExercises || {}) };
   app.innerHTML = `
     <section class="screen">
       <div class="topbar">
         <div class="brand">
-          <p class="eyebrow">Simple Bodyweight Tracker</p>
           <h1>${hasSavedPlan(state) ? "Sửa plan" : "Plan tập của bạn"}</h1>
         </div>
-        <button class="btn primary" type="submit" form="plan-form">Lưu plan</button>
+        <div class="topbar-actions">
+          ${program.id === "strength" ? renderStrengthModeToggle(strengthMode) : ""}
+          <button class="btn primary" type="submit" form="plan-form">Lưu plan</button>
+        </div>
       </div>
       <div class="program-options">
         ${PROGRAM_TEMPLATES.map((template) => `
@@ -409,7 +494,7 @@ function renderPlan() {
         <h2>${escapeHtml(program.label)}</h2>
         <p class="muted">${program.lockedSetup ? "Complete beginner chỉ tập các nhóm bài được liệt kê để xây nền. Không chọn variation ở bước setup." : "Mỗi trường progression chỉ hiện khoảng 4 bài một lúc. Kéo trong danh sách để chọn bài phù hợp hiện tại."}</p>
       </div>
-      <form id="plan-form" class="form" data-form="plan" data-program="${program.id}">
+      <form id="plan-form" class="form" data-form="plan" data-program="${program.id}" data-strength-mode="${strengthMode}">
         <div class="routine-editor">
           ${routineItems.map((item) => renderRoutineSetupItem(item, draftExercises, program)).join("")}
         </div>
@@ -422,10 +507,6 @@ function renderPlan() {
 function renderHome() {
   app.innerHTML = `
     <section class="screen home-screen">
-      <div class="home-topbar">
-        <strong>Start Bodyweight</strong>
-        <button class="btn small home-plan-button" data-action="edit-plan">Xem plan</button>
-      </div>
       <section class="home-hero">
         <div class="home-hero-copy">
           <p class="home-logo"><span class="home-logo-mark">S</span><span>Start<br />Bodyweight</span></p>
@@ -484,17 +565,30 @@ function renderHomeTrustItem(icon, title, subtitle) {
   `;
 }
 
+function renderStrengthModeToggle(activeMode) {
+  const mode = getStrengthMode(activeMode);
+  return `
+    <div class="strength-mode-toggle" role="tablist" aria-label="Strength split mode">
+      <button class="strength-mode-option ${mode === "push" ? "active" : ""}" type="button" data-action="strength-mode" data-mode="push" role="tab" aria-selected="${mode === "push"}">Push</button>
+      <button class="strength-mode-option ${mode === "pull" ? "active" : ""}" type="button" data-action="strength-mode" data-mode="pull" role="tab" aria-selected="${mode === "pull"}">Pull</button>
+    </div>
+  `;
+}
+
 function renderExerciseList() {
   const hasVisibleCompletions = getVisibleTodayEntries().length > 0;
   const canUndoReset = isTodayTimestamp(state.completionResetAt);
+  const strengthMode = getStrengthMode(state.strengthMode);
+  const routineItems = getVisibleRoutineItems(state.routineItems, state.programId, strengthMode);
   app.innerHTML = `
     <section class="screen">
-      ${topbar("Chọn bài tập", "", `
-        <button class="btn small" data-action="reset-today" ${hasVisibleCompletions ? "" : "disabled"}>Reset</button>
-        <button class="btn small" data-action="undo-reset" ${canUndoReset ? "" : "disabled"}>Undo</button>
+      ${topbar("Today's Exercise", "", `
+        ${state.programId === "strength" ? renderStrengthModeToggle(strengthMode) : ""}
+        <button class="btn small icon-action" data-action="reset-today" aria-label="Reset" ${hasVisibleCompletions ? "" : "disabled"}>${iconSvg("rotate_ccw")}</button>
+        <button class="btn small icon-action" data-action="undo-reset" aria-label="Undo" ${canUndoReset ? "" : "disabled"}>${iconSvg("undo")}</button>
       `)}
       <div class="list">
-        ${state.routineItems.map((item, index) => renderWorkoutRow(item, index)).join("")}
+        ${routineItems.map((item, index) => renderWorkoutRow(item, index)).join("")}
       </div>
       ${renderBottomNav("workouts")}
     </section>
@@ -509,6 +603,9 @@ function renderFixedDetail() {
   }
   const completedEntry = getVisibleTodayEntries().find((entry) => entry.kind === "fixed" && entry.itemId === item.id);
   const imageUrl = getFixedItemImage(item);
+  const isStretching = getFixedItemLabel(item) === "Stretch";
+  const completedButtonLabel = isStretching ? "Hoàn thành buổi tập" : "Tiếp tục tập";
+  const completedButtonAction = isStretching ? "home" : "list";
   app.innerHTML = `
     <section class="screen">
       ${topbar(item.title, "list")}
@@ -522,7 +619,7 @@ function renderFixedDetail() {
         </span>
         <span class="row-actions">
           ${completedEntry
-            ? `<span class="btn small card-undo-button" data-action="undo-fixed" data-entry="${completedEntry.id}">Undo</span>`
+            ? `<button class="btn primary small card-continue-button" type="button" data-action="${completedButtonAction}">${completedButtonLabel}</button>`
             : `<span class="target-pill">${escapeHtml(item.prescription)}</span>`}
         </span>
       </div>
@@ -654,19 +751,35 @@ function renderAccumulation() {
 }
 
 function renderAchievement() {
+  const detailCategory = view.achievementDetailCategoryId ? getCategory(view.achievementDetailCategoryId) : null;
+  if (detailCategory) {
+    renderAchievementDetail(detailCategory);
+    return;
+  }
+
+  const activeTab = view.achievementTab === "skill" ? "skill" : "progressions";
   app.innerHTML = `
     <section class="screen achievement-screen">
       ${topbar("Achievement", "")}
-      <div class="achievement-legend">
-        <button class="achievement-filter">All Progressions</button>
-        ${renderAchievementLegendItem("beginner", "Beginner")}
-        ${renderAchievementLegendItem("intermediate", "Intermediate")}
-        ${renderAchievementLegendItem("pro", "Pro")}
-        ${renderAchievementLegendItem("master", "Master")}
+      <div class="achievement-tabs" role="tablist" aria-label="Achievement sections">
+        <button class="achievement-tab ${activeTab === "progressions" ? "active" : ""}" data-action="achievement-tab" data-tab="progressions" role="tab" aria-selected="${activeTab === "progressions"}">All Progressions</button>
+        <button class="achievement-tab ${activeTab === "skill" ? "active" : ""}" data-action="achievement-tab" data-tab="skill" role="tab" aria-selected="${activeTab === "skill"}">Skill</button>
       </div>
-      <div class="achievement-list">
-        ${progressions.map((category) => renderAchievementCard(category)).join("")}
-      </div>
+      ${activeTab === "progressions" ? `
+        <div class="achievement-legend">
+          ${renderAchievementLegendItem("beginner", "Beginner")}
+          ${renderAchievementLegendItem("intermediate", "Intermediate")}
+          ${renderAchievementLegendItem("pro", "Pro")}
+          ${renderAchievementLegendItem("master", "Master")}
+        </div>
+        <div class="achievement-list">
+          ${progressions.map((category) => renderAchievementCard(category)).join("")}
+        </div>
+      ` : `
+        <div class="achievement-list skill-list">
+          ${ADVANCED_SKILLS.map((skill) => renderSkillCard(skill)).join("")}
+        </div>
+      `}
       ${renderBottomNav("achievement")}
     </section>
   `;
@@ -687,6 +800,8 @@ function renderAchievementCard(category) {
   const total = category.exercises.length;
   const percent = Math.round((achievedCount / total) * 100);
   const tier = getAchievementTier(currentIndex, total);
+  const currentExercise = getCurrentExercise(category);
+  const finalExercise = category.exercises[total - 1];
   return `
     <article class="achievement-card tier-${tier}">
       <div class="achievement-icon-ring">
@@ -700,10 +815,14 @@ function renderAchievementCard(category) {
         <div class="achievement-steps">
           ${category.exercises.map((exercise, index) => `
             <span
-              class="achievement-step ${index <= currentIndex ? "achieved" : ""} ${index === currentIndex ? "current" : ""}"
+              class="achievement-step ${index < currentIndex ? "achieved" : ""} ${index === currentIndex ? "current" : ""} ${index > currentIndex ? "locked" : ""}"
               title="${escapeHtml(exercise)}"
-            >${index + 1}</span>
+            >${index > currentIndex ? iconSvg("lock") : index + 1}</span>
           `).join("")}
+        </div>
+        <div class="achievement-exercise-labels">
+          <span>${escapeHtml(currentExercise)}</span>
+          <span>${escapeHtml(finalExercise)}</span>
         </div>
         <div class="achievement-tier-labels">
           <span class="tier-beginner">Beginner</span>
@@ -712,7 +831,59 @@ function renderAchievementCard(category) {
           <span class="tier-master">Master</span>
         </div>
       </div>
-      <button class="achievement-open" data-action="track" data-category="${category.id}" aria-label="${escapeHtml(category.title)}">›</button>
+      <button class="achievement-open" data-action="achievement-detail" data-category="${category.id}" aria-label="${escapeHtml(category.title)}">›</button>
+    </article>
+  `;
+}
+
+function renderAchievementDetail(category) {
+  const currentIndex = state.currentExercises[category.id] || 0;
+  const tier = getAchievementTier(currentIndex, category.exercises.length);
+  app.innerHTML = `
+    <section class="screen achievement-screen tier-${tier}">
+      ${topbar(category.title, "achievement", "", "compact")}
+      <div class="achievement-detail-list">
+        ${category.exercises.map((exercise, index) => renderAchievementDetailRow(exercise, index, currentIndex)).join("")}
+      </div>
+      ${renderBottomNav("achievement")}
+    </section>
+  `;
+}
+
+function renderAchievementDetailRow(exercise, index, currentIndex) {
+  const status = index < currentIndex ? "passed" : index === currentIndex ? "current" : "locked";
+  return `
+    <div class="achievement-detail-row ${status}">
+      <span class="achievement-detail-number">${index + 1}</span>
+      <strong>${escapeHtml(exercise)}</strong>
+      <span class="achievement-detail-status">
+        ${status === "passed" ? iconSvg("check") : ""}
+        ${status === "locked" ? iconSvg("lock") : ""}
+      </span>
+    </div>
+  `;
+}
+
+function renderSkillCard(skill) {
+  const status = getSkillStatus(skill);
+  const unlocked = status.unlocked;
+  return `
+    <article class="achievement-card skill-card ${unlocked ? "unlocked" : "locked"}">
+      <div class="skill-lock-ring">
+        ${unlocked ? iconSvg("trophy") : iconSvg("lock")}
+      </div>
+      <div class="achievement-title-block skill-title-block">
+        <h2>${escapeHtml(skill.title)}</h2>
+        <p>${unlocked ? "Unlocked" : "Locked"} <span>${status.completed}/${status.total}</span></p>
+      </div>
+      <div class="skill-prerequisites">
+        ${status.prerequisites.map((item) => `
+          <span class="skill-prerequisite ${item.met ? "met" : "missing"}">
+            ${item.met ? iconSvg("check") : iconSvg("lock")}
+            ${escapeHtml(item.label)}
+          </span>
+        `).join("")}
+      </div>
     </article>
   `;
 }
@@ -723,7 +894,7 @@ function renderTimer() {
   const isDone = timerState.remaining <= 0;
   app.innerHTML = `
     <section class="screen timer-screen">
-      ${topbar("Bấm giờ", "")}
+      ${topbar("Timer", "")}
       ${isDone ? "" : `<div class="timer-mode-tabs">
         <button class="timer-mode ${timerState.mode === "rest" ? "active rest" : ""}" data-action="timer-mode" data-mode="rest">REST</button>
         <button class="timer-mode ${timerState.mode === "break" ? "active break" : ""}" data-action="timer-mode" data-mode="break">BREAK</button>
@@ -912,7 +1083,6 @@ function topbar(title, backAction, extraActions = "", variant = "") {
     <div class="topbar ${backAction ? "with-back" : ""} ${variant ? `topbar-${variant}` : ""}">
       ${backAction ? `<button class="back-fab" data-action="${backAction}" aria-label="Quay lại"></button>` : ""}
       <div class="brand">
-        <p class="eyebrow">Simple Bodyweight Tracker</p>
         <h1>${escapeHtml(title)}</h1>
       </div>
       ${extraActions ? `<div class="topbar-actions">
@@ -955,8 +1125,70 @@ function iconSvg(name) {
     dumbbell: `<rect x="3" y="8" width="3" height="8" rx="1"></rect><rect x="6" y="6" width="3" height="12" rx="1"></rect><path d="M9 12h6"></path><rect x="15" y="6" width="3" height="12" rx="1"></rect><rect x="18" y="8" width="3" height="8" rx="1"></rect>`,
     timer: `<path d="M12 8v5l3 2"></path><circle cx="12" cy="13" r="8"></circle><path d="M9 2h6M12 2v3"></path>`,
     profile: `<circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path>`,
+    lock: `<rect x="6" y="10" width="12" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path>`,
+    check: `<path d="m5 13 4 4L19 7"></path>`,
+    rotate_ccw: `<path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v6h6"></path>`,
+    undo: `<path d="M9 7 4 12l5 5"></path><path d="M5 12h10a5 5 0 0 1 5 5v1"></path>`,
+    restore: `<path d="M6.4 8.1A8 8 0 1 1 4 14"></path><path d="M3.5 6.2v6.2h6.2"></path>`,
   };
   return `<svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true">${icons[name] || icons.home}</svg>`;
+}
+
+function normalizeExerciseName(value) {
+  return String(value)
+    .toLowerCase()
+    .replaceAll("&", "and")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function findExerciseIndex(categoryId, exerciseName) {
+  const category = getCategory(categoryId);
+  if (!category) return -1;
+  const normalizedName = normalizeExerciseName(exerciseName);
+  return category.exercises.findIndex((exercise) => normalizeExerciseName(exercise) === normalizedName);
+}
+
+function hasPassedExercise(categoryId, exerciseName) {
+  const index = findExerciseIndex(categoryId, exerciseName);
+  if (index < 0) return false;
+  return Number(state.currentExercises[categoryId] || 0) > index;
+}
+
+function getSkillById(skillId) {
+  return ADVANCED_SKILLS.find((skill) => skill.id === skillId) || null;
+}
+
+function getPrerequisiteLabel(prerequisite) {
+  return prerequisite.label || prerequisite.exercise || prerequisite.skillId || "";
+}
+
+function isPrerequisiteMet(prerequisite, visited = new Set()) {
+  if (prerequisite.type === "exercise") return hasPassedExercise(prerequisite.categoryId, prerequisite.exercise);
+  if (prerequisite.type === "skill") return isSkillUnlocked(prerequisite.skillId, visited);
+  return false;
+}
+
+function isSkillUnlocked(skillId, visited = new Set()) {
+  if (visited.has(skillId)) return false;
+  const skill = getSkillById(skillId);
+  if (!skill) return false;
+  visited.add(skillId);
+  return skill.prerequisites.every((prerequisite) => isPrerequisiteMet(prerequisite, new Set(visited)));
+}
+
+function getSkillStatus(skill) {
+  const prerequisites = skill.prerequisites.map((prerequisite) => ({
+    label: getPrerequisiteLabel(prerequisite),
+    met: isPrerequisiteMet(prerequisite),
+  }));
+  const completed = prerequisites.filter((prerequisite) => prerequisite.met).length;
+  return {
+    prerequisites,
+    completed,
+    total: prerequisites.length,
+    unlocked: completed === prerequisites.length,
+  };
 }
 
 function getAchievementTier(index, total) {
@@ -1103,6 +1335,16 @@ function getProgramTemplate(id) {
 
 function createRoutineItems(programId = "basic") {
   return getProgramTemplate(programId).routineItems.map((item) => ({ ...item }));
+}
+
+function getStrengthMode(value) {
+  return value === "pull" ? "pull" : "push";
+}
+
+function getVisibleRoutineItems(items, programId, strengthMode = "push") {
+  if (programId !== "strength") return items;
+  const allowedItems = STRENGTH_MODE_ITEMS[getStrengthMode(strengthMode)];
+  return items.filter((item) => allowedItems.has(item.id));
 }
 
 function normalizeRoutineItems(items, programId = "basic") {
@@ -1438,7 +1680,7 @@ function renderWorkoutRow(item, index) {
         </span>
         <span class="row-actions">
           ${completedEntry
-            ? `<span class="btn small card-undo-button" data-action="undo-fixed" data-entry="${completedEntry.id}">Undo</span>`
+            ? `<span class="btn small card-reset-button" data-action="undo-fixed" data-entry="${completedEntry.id}" aria-label="Reset completion">${iconSvg("restore")}</span>`
             : `<span class="target-pill">${escapeHtml(item.prescription)}</span>`}
         </span>
       </button>
@@ -1459,7 +1701,7 @@ function renderWorkoutRow(item, index) {
   const alternatingNote = item.kind === "alternating" ? `Luân phiên: hôm nay ${category.id === "push_up" ? "push up" : "dip"}` : item.note;
   const rowActions = [
     ready ? `<span class="status-pill ready">Đủ lên bài</span>` : "",
-    ...completedEntries.map((entry) => `<span class="btn small card-undo-button" data-action="undo-exercise" data-entry="${entry.id}">Undo</span>`),
+    ...completedEntries.map((entry) => `<span class="btn small card-reset-button" data-action="undo-exercise" data-entry="${entry.id}" aria-label="Reset completion">${iconSvg("restore")}</span>`),
   ].filter(Boolean).join("");
   return `
     <button class="exercise-row workout-card${completedClass}" data-action="track" data-category="${category.id}" style="--card-image:url('${imageUrl}')">
@@ -1555,7 +1797,9 @@ app.addEventListener("click", (event) => {
   if (action === "home") setView({ name: "home", completion: null, editingHistoryId: null });
   if (action === "list") setView({ name: "list", completion: null, editingHistoryId: null });
   if (action === "accumulation") setView({ name: "accumulation", completion: null, editingHistoryId: null });
-  if (action === "achievement") setView({ name: "achievement", completion: null, editingHistoryId: null });
+  if (action === "achievement") setView({ name: "achievement", achievementTab: "progressions", achievementDetailCategoryId: null, completion: null, editingHistoryId: null });
+  if (action === "achievement-tab") setView({ name: "achievement", achievementDetailCategoryId: null, achievementTab: button.dataset.tab === "skill" ? "skill" : "progressions" });
+  if (action === "achievement-detail") setView({ name: "achievement", achievementTab: "progressions", achievementDetailCategoryId: button.dataset.category });
   if (action === "edit-plan") setView({ name: "plan" });
   if (action === "fixed-detail") setView({ name: "fixed", fixedItemId: button.dataset.item });
   if (action === "timer") setView({ name: "timer" });
@@ -1565,7 +1809,22 @@ app.addEventListener("click", (event) => {
   if (action === "timer-reset") resetTimer();
   if (action === "timer-skip") skipTimer();
   if (action === "timer-continue") continueTimerWorkout();
-  if (action === "program-option") setView({ name: "plan", programId: button.dataset.program, draftExercises: { ...state.currentExercises, ...(view.draftExercises || {}) } });
+  if (action === "strength-mode") {
+    const strengthMode = getStrengthMode(button.dataset.mode);
+    if (view.name === "plan") {
+      setView({ name: "plan", strengthMode });
+    } else {
+      state.strengthMode = strengthMode;
+      saveState();
+      setView({ name: "list" });
+    }
+  }
+  if (action === "program-option") setView({
+    name: "plan",
+    programId: button.dataset.program,
+    strengthMode: button.dataset.program === "strength" ? getStrengthMode(view.strengthMode || state.strengthMode) : view.strengthMode,
+    draftExercises: { ...state.currentExercises, ...(view.draftExercises || {}) },
+  });
   if (action === "variation") {
     setView({
       name: "plan",
@@ -1611,6 +1870,7 @@ app.addEventListener("submit", (event) => {
     state.planLabel = program.label;
     state.planMode = "sample";
     state.programId = program.id;
+    state.strengthMode = program.id === "strength" ? getStrengthMode(form.dataset.strengthMode || view.strengthMode || state.strengthMode) : state.strengthMode;
     state.routineItems = createRoutineItems(program.id);
     state.currentExercises = { ...state.currentExercises, ...selectedExercises, ...getLockedProgramExerciseDefaults(program) };
     state.nextAlternatingSlot = state.nextAlternatingSlot === "dip" ? "dip" : "push_up";
