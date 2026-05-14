@@ -2457,3 +2457,75 @@ textarea {
     0 0 18px rgba(255, 122, 26, 0.28),
     0 8px 24px rgba(0, 0, 0, 0.45);
 }
+
+.workout-card .card-stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.workout-card .card-stats span {
+  min-height: 0;
+  width: fit-content;
+  max-width: 100%;
+  border-right: 0;
+  padding-right: 0;
+  white-space: normal;
+}
+
+.workout-card .card-stats span:nth-child(2) {
+  color: #ffffff;
+  font-size: 1.08rem;
+}
+
+.workout-card .card-stats span:last-child {
+  color: var(--primary);
+}
+
+.workout-card .done-line {
+  display: block;
+  max-width: min(100%, 28ch);
+  overflow-wrap: anywhere;
+  line-height: 1.08;
+}
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(14px);
+}
+
+.confirm-dialog {
+  width: min(420px, 100%);
+  display: grid;
+  gap: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px;
+  background:
+    linear-gradient(135deg, rgba(255, 122, 26, 0.12), transparent 58%),
+    rgba(20, 24, 30, 0.88);
+  box-shadow:
+    0 0 0 1px rgba(255, 122, 26, 0.12),
+    0 20px 60px rgba(0, 0, 0, 0.62);
+  text-align: center;
+}
+
+.confirm-dialog h2 {
+  color: #ffffff;
+  font-size: 1.3rem;
+  text-transform: uppercase;
+}
+
+.confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}

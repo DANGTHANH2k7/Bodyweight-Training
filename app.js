@@ -577,7 +577,6 @@ function renderStrengthModeToggle(activeMode) {
 
 function renderExerciseList() {
   const hasVisibleCompletions = getVisibleTodayEntries().length > 0;
-  const canUndoReset = isTodayTimestamp(state.completionResetAt);
   const strengthMode = getStrengthMode(state.strengthMode);
   const routineItems = getVisibleRoutineItems(state.routineItems, state.programId, strengthMode);
   app.innerHTML = `
@@ -585,13 +584,27 @@ function renderExerciseList() {
       ${topbar("Today's Exercise", "", `
         ${state.programId === "strength" ? renderStrengthModeToggle(strengthMode) : ""}
         <button class="btn small icon-action" data-action="reset-today" aria-label="Reset" ${hasVisibleCompletions ? "" : "disabled"}>${iconSvg("rotate_ccw")}</button>
-        <button class="btn small icon-action" data-action="undo-reset" aria-label="Undo" ${canUndoReset ? "" : "disabled"}>${iconSvg("undo")}</button>
       `)}
       <div class="list">
         ${routineItems.map((item, index) => renderWorkoutRow(item, index)).join("")}
       </div>
+      ${view.confirmReset ? renderResetConfirmation() : ""}
       ${renderBottomNav("workouts")}
     </section>
+  `;
+}
+
+function renderResetConfirmation() {
+  return `
+    <div class="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="reset-confirm-title">
+      <div class="confirm-dialog">
+        <h2 id="reset-confirm-title">Bắt đầu buổi tập mới?</h2>
+        <div class="confirm-actions">
+          <button class="btn primary" data-action="confirm-reset">YES</button>
+          <button class="btn" data-action="cancel-reset">NO</button>
+        </div>
+      </div>
+    </div>
   `;
 }
 
@@ -1414,14 +1427,7 @@ function resetTodayCompletions() {
   if (!getVisibleTodayEntries().length) return;
   state.completionResetAt = new Date().toISOString();
   saveState();
-  setView({ name: "list" });
-}
-
-function undoTodayReset() {
-  if (!isTodayTimestamp(state.completionResetAt)) return;
-  state.completionResetAt = "";
-  saveState();
-  setView({ name: "list" });
+  setView({ name: "list", confirmReset: false });
 }
 
 function setAlternatingSlot(categoryId) {
@@ -1693,6 +1699,7 @@ function renderWorkoutRow(item, index) {
   const completedEntries = item.kind === "alternating"
     ? getVisibleTodayEntries().filter((entry) => entry.category === "push_up" || entry.category === "dip")
     : getVisibleTodayEntries().filter((entry) => entry.category === category.id);
+  const latestCompletedEntry = completedEntries[0] || null;
   const completedClass = completedEntries.length ? " completed" : "";
   const imageKey = getExerciseImageKey(category, exercise);
   const meta = getExerciseMeta(category, exercise);
@@ -1701,7 +1708,7 @@ function renderWorkoutRow(item, index) {
   const alternatingNote = item.kind === "alternating" ? `Luân phiên: hôm nay ${category.id === "push_up" ? "push up" : "dip"}` : item.note;
   const rowActions = [
     ready ? `<span class="status-pill ready">Đủ lên bài</span>` : "",
-    ...completedEntries.map((entry) => `<span class="btn small card-reset-button" data-action="undo-exercise" data-entry="${entry.id}" aria-label="Reset completion">${iconSvg("restore")}</span>`),
+    latestCompletedEntry ? `<span class="btn small card-reset-button" data-action="undo-exercise" data-entry="${latestCompletedEntry.id}" aria-label="Reset completion">${iconSvg("restore")}</span>` : "",
   ].filter(Boolean).join("");
   return `
     <button class="exercise-row workout-card${completedClass}" data-action="track" data-category="${category.id}" style="--card-image:url('${imageUrl}')">
@@ -1712,7 +1719,6 @@ function renderWorkoutRow(item, index) {
         <span class="row-meta">${escapeHtml(alternatingNote)}</span>
         <span class="card-stats">
           <span>${escapeHtml(meta.muscle)}</span>
-          <span>${formatResult(progress.nextTarget, category.type)}</span>
           <span>${difficulty}</span>
         </span>
         ${item.kind === "alternating" ? `
@@ -1721,10 +1727,10 @@ function renderWorkoutRow(item, index) {
             <span class="mini-toggle ${category.id === "dip" ? "selected" : ""}" data-action="set-alternating" data-category="dip">Dip</span>
           </span>
         ` : ""}
-        ${completedEntries.map((entry) => {
-          const entryCategory = getCategory(entry.category);
-          return `<span class="done-line">Hoàn thành hôm nay: ${escapeHtml(entry.exerciseName)} - ${formatResult(entry.result, entryCategory.type)}</span>`;
-        }).join("")}
+        ${latestCompletedEntry ? (() => {
+          const entryCategory = getCategory(latestCompletedEntry.category);
+          return `<span class="done-line">Hoàn thành hôm nay: ${escapeHtml(latestCompletedEntry.exerciseName)} - ${formatResult(latestCompletedEntry.result, entryCategory.type)}</span>`;
+        })() : ""}
         ${ready ? `<span class="row-meta">Gợi ý: chuyển sang ${escapeHtml(getNextExercise(category) || "bài cuối")}</span>` : ""}
         <span class="card-field-label">${escapeHtml(getShortCategoryLabel(category.id))}</span>
       </span>
@@ -1837,8 +1843,9 @@ app.addEventListener("click", (event) => {
   }
   if (action === "track") setView({ name: "track", categoryId: button.dataset.category, editingHistoryId: null });
   if (action === "advance") advanceExercise(button.dataset.category);
-  if (action === "reset-today") resetTodayCompletions();
-  if (action === "undo-reset") undoTodayReset();
+  if (action === "reset-today") setView({ name: "list", confirmReset: true });
+  if (action === "confirm-reset") resetTodayCompletions();
+  if (action === "cancel-reset") setView({ name: "list", confirmReset: false });
   if (action === "set-alternating") setAlternatingSlot(button.dataset.category);
   if (action === "toggle-fixed") toggleFixedCompletion(button.dataset.item, button.dataset.title, button.dataset.prescription);
   if (action === "undo-fixed") undoFixedCompletion(button.dataset.entry);
