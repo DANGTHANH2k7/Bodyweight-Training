@@ -1493,15 +1493,17 @@ input[type="number"] {
 }
 
 .achievement-steps {
-  display: grid;
-  grid-template-columns: repeat(var(--achievement-count, 15), minmax(0, 1fr));
+  display: flex;
+  justify-content: space-between;
   gap: clamp(3px, 0.7vw, 7px);
   align-items: center;
   min-width: 0;
 }
 
 .achievement-step {
-  width: min(22px, 100%);
+  width: 22px;
+  min-width: 12px;
+  flex: 0 1 22px;
   aspect-ratio: 1;
   height: auto;
   display: grid;
@@ -1830,12 +1832,15 @@ input[type="number"] {
   }
 
   .achievement-steps {
-    grid-template-columns: repeat(var(--achievement-count, 15), minmax(0, 1fr));
+    display: flex;
+    justify-content: space-between;
     gap: 4px;
   }
 
   .achievement-step {
-    width: min(20px, 100%);
+    width: 20px;
+    min-width: 10px;
+    flex: 0 1 20px;
     height: auto;
     font-size: clamp(0.48rem, 2vw, 0.66rem);
   }
