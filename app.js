@@ -509,7 +509,7 @@ function renderHome() {
     <section class="screen home-screen">
       <section class="home-hero">
         <div class="home-hero-copy">
-          <p class="home-logo"><span class="home-logo-mark">S</span><span>Start<br />Bodyweight</span></p>
+          <p class="home-logo"><img class="home-logo-image" src="./images/brand/favicon.png" alt="" /><span>Start<br />Bodyweight</span></p>
           <h1>Smarter Plan.<br />Stronger You.<br /><span>Every Day.</span></h1>
           <p class="home-description">The all-in-one app inspired by Start Bodyweight by Nick Janvier. Plan your workouts, track your progress, and build real strength with bodyweight training.</p>
           <button class="btn primary home-cta" data-action="list">Start Working Out <span>→</span></button>
