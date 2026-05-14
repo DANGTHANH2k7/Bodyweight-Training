@@ -1494,14 +1494,16 @@ input[type="number"] {
 
 .achievement-steps {
   display: grid;
-  grid-template-columns: repeat(15, minmax(18px, 1fr));
-  gap: 7px;
+  grid-template-columns: repeat(var(--achievement-count, 15), minmax(0, 1fr));
+  gap: clamp(3px, 0.7vw, 7px);
   align-items: center;
+  min-width: 0;
 }
 
 .achievement-step {
-  width: 22px;
-  height: 22px;
+  width: min(22px, 100%);
+  aspect-ratio: 1;
+  height: auto;
   display: grid;
   place-items: center;
   border-radius: 999px;
@@ -1828,14 +1830,14 @@ input[type="number"] {
   }
 
   .achievement-steps {
-    grid-template-columns: repeat(auto-fit, minmax(20px, 1fr));
-    gap: 6px;
+    grid-template-columns: repeat(var(--achievement-count, 15), minmax(0, 1fr));
+    gap: 4px;
   }
 
   .achievement-step {
-    width: 20px;
-    height: 20px;
-    font-size: 0.66rem;
+    width: min(20px, 100%);
+    height: auto;
+    font-size: clamp(0.48rem, 2vw, 0.66rem);
   }
 
   .achievement-exercise-labels {

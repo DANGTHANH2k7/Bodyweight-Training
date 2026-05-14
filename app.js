@@ -825,7 +825,7 @@ function renderAchievementCard(category) {
         <p>${achievedCount}/${total} skills <span>${percent}%</span></p>
       </div>
       <div class="achievement-track">
-        <div class="achievement-steps">
+        <div class="achievement-steps" style="--achievement-count:${total}">
           ${category.exercises.map((exercise, index) => `
             <span
               class="achievement-step ${index < currentIndex ? "achieved" : ""} ${index === currentIndex ? "current" : ""} ${index > currentIndex ? "locked" : ""}"
