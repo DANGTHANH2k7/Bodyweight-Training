@@ -4388,18 +4388,28 @@ textarea {
   line-height: 1;
 }
 
+.timer-screen > .topbar {
+  min-height: auto;
+  padding: 10px 12px;
+  border-radius: 18px;
+}
+
+.timer-screen .brand h1 {
+  font-size: clamp(1.35rem, 4.5vw, 1.9rem);
+}
+
 .timer-settings {
-  width: 46px;
-  height: 46px;
-  min-height: 46px;
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
   padding: 0;
   border-radius: 999px;
   color: #aab4c3;
 }
 
 .timer-settings .line-icon {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
 }
 
 .timer-mode-tabs,
@@ -4545,8 +4555,56 @@ textarea {
   z-index: 30;
 }
 
+.home-floating-cta.needs-plan {
+  overflow: visible;
+}
+
+.home-floating-cta.needs-plan::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  z-index: -1;
+  border: 2px solid rgba(255, 184, 76, 0.95);
+  border-radius: inherit;
+  opacity: 0;
+  box-shadow:
+    0 0 18px rgba(255, 122, 26, 0.9),
+    0 0 46px rgba(255, 122, 26, 0.48),
+    0 0 82px rgba(255, 122, 26, 0.22);
+  animation: startPlanRingPulse 0.9s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes startPlanRingPulse {
+  0%, 100% {
+    opacity: 0.18;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
 .timer-duration-tabs {
   grid-template-columns: repeat(2, 1fr);
+}
+
+.timer-duration-tabs.is-placeholder {
+  pointer-events: none;
+}
+
+.timer-duration-tabs.is-placeholder .timer-duration {
+  visibility: hidden;
+}
+
+.track-guide-button,
+.track-guide-button:hover {
+  width: 100%;
+  min-height: 58px;
+  justify-content: center;
+  padding-inline: 28px;
+  border-radius: 22px;
 }
 
 .fixed-detail-actions {
@@ -4570,4 +4628,511 @@ textarea {
 
 .fixed-completion-split .btn {
   min-height: 56px;
+}
+
+.plan-sticky-head,
+.achievement-screen > .topbar,
+.timer-screen > .topbar {
+  position: sticky;
+  top: 10px;
+  z-index: 24;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.018)),
+    rgba(6, 10, 16, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 14px 34px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(20px) saturate(1.28);
+}
+
+.achievement-detail-screen > .topbar,
+.skill-detail-screen > .topbar,
+.track-screen > .topbar,
+.fixed-detail-screen > .topbar {
+  position: sticky;
+  top: 10px;
+  z-index: 24;
+  margin: 0;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(12px, 2vw, 22px);
+  min-height: clamp(82px, 10vw, 118px);
+  padding: clamp(14px, 2.2vw, 24px) clamp(16px, 2.6vw, 30px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 26px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.018)),
+    radial-gradient(circle at 10% 0%, rgba(255, 122, 26, 0.12), transparent 42%),
+    rgba(6, 10, 16, 0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.03),
+    0 16px 42px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(22px) saturate(1.3);
+}
+
+.achievement-detail-screen > .topbar .brand,
+.skill-detail-screen > .topbar .brand,
+.track-screen > .topbar .brand,
+.fixed-detail-screen > .topbar .brand {
+  min-width: 0;
+}
+
+.achievement-detail-screen > .topbar h1,
+.skill-detail-screen > .topbar h1,
+.track-screen > .topbar h1,
+.fixed-detail-screen > .topbar h1 {
+  overflow: visible;
+  color: #f4f7fb;
+  font-size: clamp(1.05rem, 4vw, 1.85rem);
+  font-style: italic;
+  line-height: 1.05;
+  text-overflow: clip;
+  text-transform: uppercase;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.achievement-detail-screen > .topbar .back-fab,
+.skill-detail-screen > .topbar .back-fab,
+.track-screen > .topbar .back-fab,
+.fixed-detail-screen > .topbar .back-fab {
+  width: clamp(48px, 7vw, 64px);
+  height: clamp(48px, 7vw, 64px);
+  flex: 0 0 auto;
+}
+
+.achievement-tabs {
+  position: sticky;
+  top: 82px;
+  z-index: 23;
+}
+
+.topbar-workout {
+  position: sticky;
+  top: 10px;
+  z-index: 24;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.018)),
+    rgba(6, 10, 16, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 14px 34px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(20px) saturate(1.28);
+}
+
+.topbar-workout .brand {
+  min-width: 0;
+}
+
+.topbar-workout h1 {
+  overflow: hidden;
+  font-size: clamp(1.18rem, 5vw, 2rem);
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-workout .topbar-actions {
+  width: auto;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.topbar-workout .strength-mode-toggle {
+  width: auto;
+  min-width: 0;
+}
+
+.topbar-workout .strength-mode-option {
+  min-height: 38px;
+  padding-inline: 10px;
+  font-size: 0.78rem;
+}
+
+.topbar-workout .icon-action {
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  min-height: 42px;
+  padding: 0;
+}
+
+.fixed-completion-split .split-continue,
+.fixed-completion-split .split-continue:hover {
+  border-color: rgba(255, 138, 45, 0.72);
+  background:
+    radial-gradient(circle at 28% 0%, rgba(255, 255, 255, 0.42), transparent 34%),
+    linear-gradient(180deg, #ff9135 0%, #ff6a00 100%);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 -12px 22px rgba(154, 45, 0, 0.16),
+    0 0 24px rgba(255, 122, 26, 0.36),
+    0 12px 28px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(18px) saturate(1.22);
+}
+
+.program-card {
+  min-height: 96px;
+}
+
+.program-card span {
+  max-width: 24ch;
+}
+
+.achievement-card,
+.skill-detail-card,
+.achievement-detail-list {
+  border-color: rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.028) 34%, rgba(255, 255, 255, 0.012)),
+    radial-gradient(circle at 12% 0%, rgba(var(--tier-rgb, 255, 122, 26), 0.1), transparent 36%),
+    rgba(8, 13, 20, 0.64);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04),
+    0 22px 58px rgba(0, 0, 0, 0.54),
+    0 0 34px rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(24px) saturate(1.36);
+}
+
+.achievement-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    0 26px 66px rgba(0, 0, 0, 0.58),
+    0 0 38px rgba(var(--tier-rgb, 255, 122, 26), 0.12);
+}
+
+/* Unified liquid-glass headers for every app tab/screen. */
+.screen > .topbar {
+  position: sticky;
+  top: 10px;
+  z-index: 24;
+  width: 100%;
+  max-width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.026) 42%, rgba(255, 255, 255, 0.012)),
+    radial-gradient(circle at 12% 0%, rgba(255, 122, 26, 0.11), transparent 40%),
+    rgba(7, 11, 17, 0.58);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.035),
+    0 18px 46px rgba(0, 0, 0, 0.5),
+    0 0 34px rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(24px) saturate(1.34);
+}
+
+.timer-screen > .topbar,
+.achievement-screen > .topbar,
+.profile-screen > .topbar,
+.topbar-workout {
+  min-height: 62px;
+  padding-block: 10px;
+  border-radius: 18px;
+}
+
+.timer-screen > .topbar {
+  padding-block: 2px;
+}
+
+.timer-screen .brand h1,
+.achievement-screen > .topbar:not(.with-back) h1,
+.topbar-workout h1 {
+  font-size: clamp(1.15rem, 4vw, 1.65rem);
+}
+
+/* Main tab headers: match Today's Exercise exactly. */
+.topbar-workout,
+.timer-screen > .topbar:not(.with-back),
+.achievement-screen:not(.achievement-detail-screen):not(.skill-detail-screen) > .topbar:not(.with-back),
+.profile-screen > .topbar:not(.with-back) {
+  width: 100%;
+  min-height: 62px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 18px;
+}
+
+.topbar-workout h1,
+.timer-screen > .topbar:not(.with-back) h1,
+.achievement-screen:not(.achievement-detail-screen):not(.skill-detail-screen) > .topbar:not(.with-back) h1,
+.profile-screen > .topbar:not(.with-back) h1 {
+  overflow: hidden;
+  font-size: clamp(1.35rem, 4.8vw, 2rem);
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-workout .topbar-actions,
+.timer-screen > .topbar:not(.with-back) .topbar-actions,
+.achievement-screen:not(.achievement-detail-screen):not(.skill-detail-screen) > .topbar:not(.with-back) .topbar-actions,
+.profile-screen > .topbar:not(.with-back) .topbar-actions {
+  width: auto;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
+.screen > .topbar::before {
+  content: "";
+  position: absolute;
+  inset: 1px 14px auto;
+  height: 44%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent);
+  opacity: 0.54;
+  pointer-events: none;
+}
+
+.screen > .topbar > * {
+  position: relative;
+  z-index: 1;
+}
+
+.screen > .topbar h1 {
+  font-size: clamp(1.35rem, 4.8vw, 2rem);
+  line-height: 1;
+}
+
+.topbar-workout h1,
+.timer-screen .brand h1 {
+  font-size: clamp(1.35rem, 4.8vw, 2rem);
+}
+
+@media (max-width: 560px) {
+  .plan-sticky-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .plan-sticky-head h1 {
+    font-size: clamp(1.18rem, 6vw, 1.6rem);
+  }
+
+  .plan-sticky-head .topbar-actions {
+    width: auto;
+  }
+
+  .plan-sticky-head .btn {
+    width: auto;
+    min-height: 42px;
+    padding-inline: 14px;
+  }
+
+  .achievement-tabs {
+    top: 74px;
+  }
+}
+
+.achievement-card.skill-card {
+  grid-template-columns: clamp(72px, 7vw, 112px) minmax(180px, 0.36fr) minmax(0, 1fr) 28px;
+}
+
+.skill-card .skill-lock-ring {
+  transition: border-color 180ms ease, color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.skill-card.skill-trophy-gray .skill-lock-ring,
+.skill-detail-screen.skill-trophy-gray .skill-detail-trophy {
+  border-color: rgba(145, 154, 168, 0.55);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(150, 160, 176, 0.12), rgba(0, 0, 0, 0.66) 68%),
+    rgba(5, 8, 13, 0.68);
+  color: #7f8896;
+  box-shadow:
+    0 0 14px rgba(145, 154, 168, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.skill-card.skill-trophy-white-glow .skill-lock-ring,
+.skill-detail-screen.skill-trophy-white-glow .skill-detail-trophy {
+  border-color: rgba(238, 244, 255, 0.72);
+  color: #aab4c3;
+  box-shadow:
+    0 0 24px rgba(238, 244, 255, 0.34),
+    0 0 46px rgba(238, 244, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.skill-card.skill-trophy-pale-gold .skill-lock-ring,
+.skill-detail-screen.skill-trophy-pale-gold .skill-detail-trophy {
+  border-color: rgba(255, 218, 117, 0.72);
+  color: #ffe1a1;
+  box-shadow:
+    0 0 26px rgba(255, 218, 117, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.skill-card.skill-trophy-gold .skill-lock-ring,
+.skill-detail-screen.skill-trophy-gold .skill-detail-trophy {
+  border-color: rgba(255, 196, 61, 0.9);
+  color: #ffc43d;
+  box-shadow:
+    0 0 32px rgba(255, 196, 61, 0.4),
+    0 0 64px rgba(255, 196, 61, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.skill-title-block em {
+  color: #8d97a6;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.skill-open {
+  align-self: center;
+  justify-self: end;
+}
+
+.skill-detail-card {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  padding: clamp(16px, 2.4vw, 26px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.014)),
+    rgba(6, 10, 16, 0.84);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 20px 54px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+
+.skill-detail-hero {
+  display: block;
+}
+
+.skill-detail-media {
+  position: relative;
+  width: min(620px, 100%);
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 122, 26, 0.13), transparent 12rem),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.015)),
+    rgba(3, 7, 12, 0.9);
+}
+
+.skill-detail-media img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.skill-detail-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(170, 180, 195, 0.2);
+}
+
+.skill-detail-placeholder .line-icon {
+  width: min(42%, 140px);
+  height: min(42%, 140px);
+  stroke-width: 1.3;
+}
+
+.skill-detail-copy {
+  position: absolute;
+  top: clamp(18px, 2.2vw, 28px);
+  right: clamp(18px, 2.2vw, 28px);
+  z-index: 3;
+}
+
+.skill-detail-copy h2 {
+  color: #f4f7fb;
+  font-size: clamp(1.6rem, 4vw, 2.8rem);
+  font-style: italic;
+  text-transform: uppercase;
+}
+
+.skill-detail-trophy {
+  width: 44px;
+  height: 44px;
+  border-width: 2px;
+}
+
+.skill-detail-trophy .line-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.skill-media-guide {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  min-height: 44px;
+  padding-inline: 18px;
+  border-radius: 18px;
+}
+
+.skill-detail-prerequisites {
+  padding-top: 4px;
+}
+
+.skill-rep-form {
+  display: grid;
+  gap: 12px;
+}
+
+@media (max-width: 760px) {
+  .achievement-card.skill-card {
+    grid-template-columns: 76px minmax(0, 1fr) 24px;
+  }
+
+  .achievement-card.skill-card .skill-prerequisites {
+    grid-column: 1 / -1;
+  }
+
+  .skill-detail-hero {
+    display: block;
+  }
+
+  .skill-detail-media {
+    width: 100%;
+  }
+
+  .skill-detail-copy {
+    top: 14px;
+    right: 14px;
+  }
+
+  .skill-media-guide {
+    top: 12px;
+    right: 12px;
+    transform: translateY(calc(58px + 10px));
+  }
 }

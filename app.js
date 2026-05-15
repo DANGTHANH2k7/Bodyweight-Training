@@ -5,8 +5,9 @@ const PLANK_START = 30;
 const PLANK_GOAL = 60;
 const PLANK_INCREMENT = 5;
 const DEFAULT_PLAN_LABEL = "Complete beginner routine";
-const WARM_UP_LINK = "http://www.startbodyweight.com/p/simple-dynamic-warm-up.html";
-const STRETCHING_LINK = "http://www.startbodyweight.com/p/simple-static-stretching-routine.html";
+const APP_GUIDE_LINKS = window.GUIDE_LINKS || { fixed: {}, progressions: {}, skills: {} };
+const WARM_UP_LINK = APP_GUIDE_LINKS.fixed?.warm_up || "";
+const STRETCHING_LINK = APP_GUIDE_LINKS.fixed?.static_stretching || "";
 const STRENGTH_MODE_ITEMS = {
   push: new Set(["strength_push_warm_up", "strength_squat", "strength_hspu", "strength_push_up", "strength_dip", "strength_leg_raises", "strength_push_stretching"]),
   pull: new Set(["strength_pull_warm_up", "strength_pull_up", "strength_horizontal_pull", "strength_plank", "strength_pull_stretching"]),
@@ -64,7 +65,7 @@ const PROGRAM_TEMPLATES = [
   {
     id: "beginner",
     label: "Complete beginner routine",
-    summary: "3 days/week, locked foundation exercises for 8 weeks before moving to the Basic routine.",
+    summary: "Foundation plan. 3 days/week.",
     lockedSetup: true,
     routineItems: [
       { id: "beginner_warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Before every workout.", link: WARM_UP_LINK },
@@ -79,14 +80,14 @@ const PROGRAM_TEMPLATES = [
   {
     id: "basic",
     label: "Start Bodyweight basic routine",
-    summary: "Full body bodyweight routine, 3 sessions/week.",
+    summary: "Full body. 3 sessions/week.",
     lockedSetup: false,
     routineItems: BASIC_ROUTINE_ITEMS,
   },
   {
     id: "strength",
     label: "Strength split",
-    summary: "2 day split, 4-5 days/week, 5x5 with longer rests.",
+    summary: "Push/pull split. 4-5 days/week.",
     lockedSetup: false,
     routineItems: [
       { id: "strength_push_warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Prepare joints, heart rate, and range of motion.", link: WARM_UP_LINK },
@@ -110,7 +111,7 @@ const progressions = [
     id: "squat",
     title: "Squat progression",
     type: "reps",
-    link: "http://www.startbodyweight.com/p/squat-progression.html",
+    link: APP_GUIDE_LINKS.progressions?.squat || "",
     exercises: [
       "Assisted squats",
       "Deep assisted squats",
@@ -131,7 +132,7 @@ const progressions = [
     id: "pull_up",
     title: "Pull up progression",
     type: "reps",
-    link: "http://www.startbodyweight.com/p/pull-up-progression.html",
+    link: APP_GUIDE_LINKS.progressions?.pull_up || "",
     exercises: [
       "Leg assisted pull ups",
       "Jackknife pull ups",
@@ -153,7 +154,7 @@ const progressions = [
     id: "handstand_push_up",
     title: "Handstand push up progression",
     type: "reps",
-    link: "http://www.startbodyweight.com/p/handstand-push-up-progression.html",
+    link: APP_GUIDE_LINKS.progressions?.handstand_push_up || "",
     exercises: [
       "Incline pike push ups",
       "Incline pike diamond push ups",
@@ -173,7 +174,7 @@ const progressions = [
     id: "leg_raises",
     title: "Leg raises progression",
     type: "reps",
-    link: "http://www.startbodyweight.com/p/leg-raises-progression.html",
+    link: APP_GUIDE_LINKS.progressions?.leg_raises || "",
     exercises: [
       "Flat knee raises",
       "Flat bent leg raises",
@@ -195,7 +196,7 @@ const progressions = [
     id: "push_up",
     title: "Push up progression",
     type: "reps",
-    link: "http://www.startbodyweight.com/p/push-up-progression.html",
+    link: APP_GUIDE_LINKS.progressions?.push_up || "",
     exercises: [
       "Wall push ups",
       "Box push ups",
@@ -218,7 +219,7 @@ const progressions = [
     id: "dip",
     title: "Dip progression",
     type: "reps",
-    link: "http://www.startbodyweight.com/p/dip-progression.html",
+    link: APP_GUIDE_LINKS.progressions?.dip || "",
     exercises: [
       "Bent knee bench dips",
       "Straight legs bench dips",
@@ -239,7 +240,7 @@ const progressions = [
     id: "horizontal_pull",
     title: "Horizontal pulls progression",
     type: "reps",
-    link: "http://www.startbodyweight.com/p/horizontal-pulls-progression.html",
+    link: APP_GUIDE_LINKS.progressions?.horizontal_pull || "",
     exercises: [
       "Vertical pulls / Door pulls / Let me ins",
       "Vertical pulls with a towel",
@@ -259,7 +260,7 @@ const progressions = [
     id: "plank",
     title: "Plank progression",
     type: "seconds",
-    link: "http://www.startbodyweight.com/p/plank-progression.html",
+    link: APP_GUIDE_LINKS.progressions?.plank || "",
     exercises: [
       "Kneeling plank",
       "Kneeling side plank",
@@ -355,7 +356,7 @@ const ADVANCED_SKILLS = [
 ];
 
 let state = loadState();
-let view = { name: hasSavedPlan(state) ? "home" : "plan", programId: state.programId || "beginner", draftExercises: null, categoryId: null, editingHistoryId: null, completion: null };
+let view = { name: "home", programId: state.programId || "beginner", draftExercises: null, categoryId: null, editingHistoryId: null, completion: null };
 let timerState = { mode: "rest", restDuration: 60, duration: 60, remaining: 60, running: false, endsAt: null, alarm: false };
 let timerTick = null;
 let timerAlarmTick = null;
@@ -367,12 +368,17 @@ const app = document.querySelector("#app");
 function defaultState() {
   const currentExercises = {};
   const progress = {};
+  const skillProgress = {};
 
   progressions.forEach((category) => {
     currentExercises[category.id] = 0;
     progress[category.id] = category.type === "seconds"
       ? { lastResult: null, nextTarget: PLANK_START }
       : { lastResult: null, nextTarget: [...REP_START] };
+  });
+
+  ADVANCED_SKILLS.forEach((skill) => {
+    skillProgress[skill.id] = { reps: 0, lastUpdatedAt: "" };
   });
 
   return {
@@ -386,6 +392,7 @@ function defaultState() {
     completionResetAt: "",
     currentExercises,
     progress,
+    skillProgress,
     history: [],
   };
 }
@@ -413,6 +420,7 @@ function normalizeState(input) {
     completionResetAt: isTodayTimestamp(input.completionResetAt || input.completionResetDate) ? (input.completionResetAt || input.completionResetDate) : "",
     currentExercises: { ...base.currentExercises, ...(input.currentExercises || {}) },
     progress: { ...base.progress, ...(input.progress || {}) },
+    skillProgress: { ...base.skillProgress, ...(input.skillProgress || {}) },
     history: Array.isArray(input.history) ? input.history.map((item) => ({
       ...item,
       completedAt: item.completedAt || `${item.date || todayIso()}T00:00:00.000Z`,
@@ -437,6 +445,14 @@ function normalizeState(input) {
         };
   });
 
+  ADVANCED_SKILLS.forEach((skill) => {
+    const entry = merged.skillProgress[skill.id] || base.skillProgress[skill.id];
+    merged.skillProgress[skill.id] = {
+      reps: clampNumber(Number(entry.reps || 0), 0, 99),
+      lastUpdatedAt: entry.lastUpdatedAt || "",
+    };
+  });
+
   return merged;
 }
 
@@ -450,7 +466,7 @@ function setView(nextView) {
 }
 
 function render() {
-  if (!hasSavedPlan(state) || view.name === "plan") {
+  if (view.name === "plan") {
     renderPlan();
     return;
   }
@@ -469,16 +485,17 @@ function renderPlan() {
   const strengthMode = getStrengthMode(view.strengthMode || state.strengthMode);
   const routineItems = getVisibleRoutineItems(createRoutineItems(program.id), program.id, strengthMode);
   const draftExercises = { ...state.currentExercises, ...(view.draftExercises || {}) };
+  const showPlanEditor = hasSavedPlan(state) || view.planProgramChosen === true;
   app.innerHTML = `
-    <section class="screen">
-      <div class="topbar">
+    <section class="screen plan-screen">
+      <div class="topbar plan-sticky-head">
         <div class="brand">
           <h1>${hasSavedPlan(state) ? "Edit plan" : "Your training plan"}</h1>
         </div>
-        <div class="topbar-actions">
+        ${showPlanEditor ? `<div class="topbar-actions">
           ${program.id === "strength" ? renderStrengthModeToggle(strengthMode) : ""}
           <button class="btn primary" type="submit" form="plan-form">Save plan</button>
-        </div>
+        </div>` : ""}
       </div>
       <div class="program-options">
         ${PROGRAM_TEMPLATES.map((template) => `
@@ -488,26 +505,29 @@ function renderPlan() {
           </button>
         `).join("")}
       </div>
-      ${renderGuidanceLinks(program)}
-      <div class="panel">
-        <p class="eyebrow">${program.lockedSetup ? "Foundation routine locked" : "Choose variations with the scroller"}</p>
-        <h2>${escapeHtml(program.label)}</h2>
-        <p class="muted">${program.lockedSetup ? "Complete beginner uses only the listed exercise groups to build a base. Variation selection is locked during setup." : "Each progression field shows about 4 exercises at a time. Scroll the list to choose your current level."}</p>
-      </div>
-      <form id="plan-form" class="form" data-form="plan" data-program="${program.id}" data-strength-mode="${strengthMode}">
-        <div class="routine-editor">
-          ${routineItems.map((item) => renderRoutineSetupItem(item, draftExercises, program)).join("")}
+      ${showPlanEditor ? `
+        ${renderGuidanceLinks(program)}
+        <div class="panel">
+          <p class="eyebrow">${program.lockedSetup ? "Foundation routine locked" : "Choose variations"}</p>
+          <h2>${escapeHtml(program.label)}</h2>
+          <p class="muted">${program.lockedSetup ? "Foundation exercises are locked for setup." : "Scroll each progression to pick your current level."}</p>
         </div>
-      </form>
+        <form id="plan-form" class="form" data-form="plan" data-program="${program.id}" data-strength-mode="${strengthMode}">
+          <div class="routine-editor">
+            ${routineItems.map((item) => renderRoutineSetupItem(item, draftExercises, program)).join("")}
+          </div>
+        </form>
+      ` : ""}
       ${hasSavedPlan(state) ? renderBottomNav("profile") : ""}
     </section>
   `;
 }
 
 function renderHome() {
+  const isFirstRun = !hasSavedPlan(state);
   app.innerHTML = `
     <section class="screen home-screen">
-      <button class="btn primary home-floating-cta" data-action="list">Start Working Out <span>→</span></button>
+      <button class="btn primary home-floating-cta ${isFirstRun ? "needs-plan" : ""}" data-action="${isFirstRun ? "start-plan" : "list"}">Start Working Out <span>→</span></button>
       <section class="home-hero">
         <div class="home-hero-copy">
           <p class="home-logo"><img class="home-logo-image" src="./images/brand/favicon.png" alt="" /><span>Start<br />Bodyweight</span></p>
@@ -585,7 +605,7 @@ function renderExerciseList() {
       ${topbar("Today's Exercise", "", `
         ${state.programId === "strength" ? renderStrengthModeToggle(strengthMode) : ""}
         <button class="btn small icon-action" data-action="reset-today" aria-label="Reset" ${hasVisibleCompletions ? "" : "disabled"}>${iconSvg("rotate_ccw")}</button>
-      `)}
+      `, "workout")}
       <div class="list">
         ${routineItems.map((item, index) => renderWorkoutRow(item, index)).join("")}
       </div>
@@ -618,11 +638,11 @@ function renderFixedDetail() {
   const completedEntry = getVisibleTodayEntries().find((entry) => entry.kind === "fixed" && entry.itemId === item.id);
   const imageUrl = getFixedItemImage(item);
   const isStretching = getFixedItemLabel(item) === "Stretch";
-  const completedButtonLabel = isStretching ? "Kết thúc buổi tập" : "Tiếp tục";
+  const completedButtonLabel = isStretching ? "Finish workout" : "Continue";
   const completedButtonAction = isStretching ? "home" : "list";
   app.innerHTML = `
-    <section class="screen">
-      ${topbar(item.title, "list")}
+    <section class="screen fixed-detail-screen">
+      ${topbar(item.title, "list", "", "detail")}
       <div class="exercise-row workout-card routine-static${completedEntry ? " completed" : ""}" style="--card-image:url('${imageUrl}')">
         <span class="card-overlay"></span>
         <span class="row-main">
@@ -642,7 +662,7 @@ function renderFixedDetail() {
                 <button class="btn split-undo" type="button" data-action="undo-fixed" data-entry="${completedEntry.id}">Undo</button>
                 <button class="btn split-continue" type="button" data-action="${completedButtonAction}">${completedButtonLabel}</button>
               </div>`
-            : `<button class="btn primary fixed-complete-button" data-action="toggle-fixed" data-item="${item.id}" data-title="${escapeHtml(item.title)}" data-prescription="${escapeHtml(item.prescription)}">Hoàn thành</button>`}
+            : `<button class="btn primary fixed-complete-button" data-action="toggle-fixed" data-item="${item.id}" data-title="${escapeHtml(item.title)}" data-prescription="${escapeHtml(item.prescription)}">Complete</button>`}
         </div>
       </div>
       ${renderBottomNav("workouts")}
@@ -699,8 +719,8 @@ function renderTrack() {
   `;
 
   app.innerHTML = `
-    <section class="screen">
-      ${topbar(category.title, "list", "", "compact")}
+    <section class="screen track-screen">
+      ${topbar(category.title, "list", "", "detail")}
       ${isCompletedView ? "" : `<div class="panel track-overview">
         <div class="track-overview-main">
           <p class="eyebrow">${escapeHtml(category.title)}</p>
@@ -710,7 +730,7 @@ function renderTrack() {
             <div class="metric"><span>Latest result</span><strong>${formatResult(progress.lastResult, category.type)}</strong></div>
             <div class="metric"><span>Level-up goal</span><strong>${formatGoal(category.type)}</strong></div>
           </div>
-          <a class="btn guide-button" href="${category.link}" target="_blank" rel="noreferrer">View guide</a>
+          <a class="btn guide-button track-guide-button" href="${category.link}" target="_blank" rel="noreferrer">View guide</a>
         </div>
         <div class="track-image" style="--track-image:url('${progressionImageUrl}'); --track-fallback:url('${exerciseImageUrl}')" aria-hidden="true"></div>
       </div>`}
@@ -747,19 +767,14 @@ function renderSecondsInput(value) {
 }
 
 function renderAccumulation() {
-  const recent = state.history[0];
   app.innerHTML = `
-    <section class="screen">
+    <section class="screen profile-screen">
       ${topbar("Profile", "")}
       <div class="panel profile-plan">
         <p class="eyebrow">Current plan</p>
         <h2>${escapeHtml(getPlanLabel())}</h2>
         <p class="plan-text">${escapeHtml(formatRoutineSummary())}</p>
         <button class="btn primary" data-action="edit-plan">Edit plan</button>
-      </div>
-      <div class="panel">
-        <h2>Latest history</h2>
-        ${recent ? renderHistoryItem(recent) : `<p class="muted">No workouts saved yet.</p>`}
       </div>
       ${renderBottomNav("profile")}
     </section>
@@ -770,6 +785,11 @@ function renderAchievement() {
   const detailCategory = view.achievementDetailCategoryId ? getCategory(view.achievementDetailCategoryId) : null;
   if (detailCategory) {
     renderAchievementDetail(detailCategory);
+    return;
+  }
+  const detailSkill = view.skillDetailId ? getSkillById(view.skillDetailId) : null;
+  if (detailSkill) {
+    renderSkillDetail(detailSkill);
     return;
   }
 
@@ -863,8 +883,8 @@ function renderAchievementDetail(category) {
   const currentIndex = state.currentExercises[category.id] || 0;
   const tier = getAchievementTier(currentIndex, category.exercises.length);
   app.innerHTML = `
-    <section class="screen achievement-screen tier-${tier}">
-      ${topbar(category.title, "achievement", "", "compact")}
+    <section class="screen achievement-screen achievement-detail-screen tier-${tier}">
+      ${topbar(category.title, "achievement", "", "detail")}
       <div class="achievement-detail-list">
         ${category.exercises.map((exercise, index) => renderAchievementDetailRow(exercise, index, currentIndex)).join("")}
       </div>
@@ -889,15 +909,15 @@ function renderAchievementDetailRow(exercise, index, currentIndex) {
 
 function renderSkillCard(skill) {
   const status = getSkillStatus(skill);
-  const unlocked = status.unlocked;
+  const trophyState = getSkillTrophyState(status.reps);
   return `
-    <article class="achievement-card skill-card ${unlocked ? "unlocked" : "locked"}">
-      <div class="skill-lock-ring">
-        ${unlocked ? iconSvg("trophy") : iconSvg("lock")}
+    <article class="achievement-card skill-card ${status.unlocked ? "unlocked" : "locked"} skill-trophy-${trophyState}">
+      <div class="skill-lock-ring" aria-label="${escapeHtml(getSkillTrophyLabel(status.reps))}">
+        ${status.unlocked ? iconSvg("trophy") : iconSvg("lock")}
       </div>
       <div class="achievement-title-block skill-title-block">
         <h2>${escapeHtml(skill.title)}</h2>
-        <p>${unlocked ? "Unlocked" : "Locked"} <span>${status.completed}/${status.total}</span></p>
+        <p>${status.unlocked ? "Unlocked" : "Locked"} <span>${status.completed}/${status.total}</span></p>
       </div>
       <div class="skill-prerequisites">
         ${status.prerequisites.map((item) => `
@@ -907,7 +927,52 @@ function renderSkillCard(skill) {
           </span>
         `).join("")}
       </div>
+      <button class="achievement-open skill-open" data-action="skill-detail" data-skill="${skill.id}" aria-label="${escapeHtml(skill.title)}">›</button>
     </article>
+  `;
+}
+
+function renderSkillDetail(skill) {
+  const status = getSkillStatus(skill);
+  const reps = status.reps;
+  const trophyState = getSkillTrophyState(reps);
+  const guideLink = getSkillGuideLink(skill);
+  app.innerHTML = `
+    <section class="screen achievement-screen skill-detail-screen skill-trophy-${trophyState}">
+      ${topbar(skill.title, "achievement", "", "compact")}
+      <article class="skill-detail-card">
+        <div class="skill-detail-hero">
+          <div class="skill-detail-media">
+            <img src="${getSkillImagePath(skill)}" alt="" onerror="this.hidden=true" />
+            <span class="skill-detail-placeholder">${iconSvg("trophy")}</span>
+            ${guideLink ? `<a class="btn guide-button skill-media-guide" href="${guideLink}" target="_blank" rel="noreferrer">View guide</a>` : ""}
+          </div>
+          <div class="skill-detail-copy">
+            <div class="skill-lock-ring skill-detail-trophy">
+              ${status.unlocked ? iconSvg("trophy") : iconSvg("lock")}
+            </div>
+          </div>
+        </div>
+        <div class="skill-prerequisites skill-detail-prerequisites">
+          ${status.prerequisites.map((item) => `
+            <span class="skill-prerequisite ${item.met ? "met" : "missing"}">
+              ${item.met ? iconSvg("check") : iconSvg("lock")}
+              ${escapeHtml(item.label)}
+            </span>
+          `).join("")}
+        </div>
+        <form class="skill-rep-form" data-form="skill-reps" data-skill="${skill.id}">
+          <label class="set-row">
+            <span>Reps</span>
+            <button class="stepper" type="button" data-action="step" data-target="skill-reps" data-delta="-1">−</button>
+            <input id="skill-reps" name="reps" type="number" min="0" max="99" inputmode="numeric" value="${reps}" ${status.unlocked ? "" : "disabled"} />
+            <button class="stepper" type="button" data-action="step" data-target="skill-reps" data-delta="1" ${status.unlocked ? "" : "disabled"}>+</button>
+          </label>
+          <button class="btn primary" type="submit" ${status.unlocked ? "" : "disabled"}>Save reps</button>
+        </form>
+      </article>
+      ${renderBottomNav("achievement")}
+    </section>
   `;
 }
 
@@ -917,13 +982,13 @@ function renderTimer() {
   const isDone = timerState.remaining <= 0;
   app.innerHTML = `
     <section class="screen timer-screen">
-      ${topbar("Timer", "", `<button class="btn small icon-action timer-settings" type="button" aria-label="Timer settings">${iconSvg("settings")}</button>`)}
+      ${topbar("Timer", "")}
       ${isDone ? "" : `<div class="timer-mode-tabs">
         <button class="timer-mode ${timerState.mode === "rest" ? "active rest" : ""}" data-action="timer-mode" data-mode="rest">REST</button>
         <button class="timer-mode ${timerState.mode === "break" ? "active break" : ""}" data-action="timer-mode" data-mode="break">BREAK</button>
       </div>`}
-      ${!isDone && timerState.mode === "rest" ? `
-        <div class="timer-duration-tabs" aria-label="Rest duration">
+      ${!isDone ? `
+        <div class="timer-duration-tabs ${timerState.mode === "break" ? "is-placeholder" : ""}" aria-label="Rest duration">
           <button class="timer-duration ${timerState.restDuration === 60 ? "active" : ""}" data-action="timer-duration" data-duration="60">1 min</button>
           <button class="timer-duration ${timerState.restDuration === 120 ? "active" : ""}" data-action="timer-duration" data-duration="120">2 min</button>
         </div>
@@ -943,7 +1008,6 @@ function renderTimer() {
           <div class="timer-actions">
             <button class="timer-play" data-action="timer-toggle">${timerState.running ? "PAUSE" : "PLAY"}</button>
             <button class="btn small" data-action="timer-reset">Reset</button>
-            ${timerState.mode === "break" ? `<button class="btn small" data-action="timer-skip">Skip Break</button>` : ""}
           </div>
         `}
       </div>
@@ -1189,7 +1253,7 @@ function getPrerequisiteLabel(prerequisite) {
 
 function isPrerequisiteMet(prerequisite, visited = new Set()) {
   if (prerequisite.type === "exercise") return hasPassedExercise(prerequisite.categoryId, prerequisite.exercise);
-  if (prerequisite.type === "skill") return isSkillUnlocked(prerequisite.skillId, visited);
+  if (prerequisite.type === "skill") return getSkillReps(prerequisite.skillId) >= 3 && isSkillUnlocked(prerequisite.skillId, visited);
   return false;
 }
 
@@ -1207,12 +1271,56 @@ function getSkillStatus(skill) {
     met: isPrerequisiteMet(prerequisite),
   }));
   const completed = prerequisites.filter((prerequisite) => prerequisite.met).length;
+  const reps = getSkillReps(skill.id);
   return {
     prerequisites,
     completed,
     total: prerequisites.length,
+    reps,
     unlocked: completed === prerequisites.length,
   };
+}
+
+function getSkillReps(skillId) {
+  return clampNumber(Number(state.skillProgress?.[skillId]?.reps || 0), 0, 99);
+}
+
+function getSkillTrophyState(reps) {
+  if (reps >= 3) return "gold";
+  if (reps >= 2) return "pale-gold";
+  if (reps >= 1) return "white-glow";
+  return "gray";
+}
+
+function getSkillTrophyLabel(reps) {
+  if (reps >= 3) return "Gold trophy";
+  if (reps >= 2) return "Light gold trophy";
+  if (reps >= 1) return "Started trophy";
+  return "Ready, not completed";
+}
+
+function getSkillImagePath(skill) {
+  return `./images/skills/${skill.id}.png`;
+}
+
+function getSkillGuideLink(skill) {
+  return APP_GUIDE_LINKS.skills?.[skill.id] || "";
+}
+
+function saveSkillReps(skillId, reps) {
+  const skill = getSkillById(skillId);
+  if (!skill) return;
+  const status = getSkillStatus(skill);
+  if (!status.unlocked) return;
+  state.skillProgress = {
+    ...(state.skillProgress || {}),
+    [skillId]: {
+      reps: clampNumber(Number(reps || 0), 0, 99),
+      lastUpdatedAt: new Date().toISOString(),
+    },
+  };
+  saveState();
+  setView({ name: "achievement", achievementTab: "skill", skillDetailId: skillId, achievementDetailCategoryId: null });
 }
 
 function getAchievementTier(index, total) {
@@ -1911,12 +2019,14 @@ app.addEventListener("click", (event) => {
 
   if (action === "home") setView({ name: "home", completion: null, editingHistoryId: null });
   if (action === "list") setView({ name: "list", completion: null, editingHistoryId: null });
+  if (action === "start-plan") setView({ name: "plan", planProgramChosen: false, completion: null, editingHistoryId: null });
   if (action === "accumulation") setView({ name: "accumulation", completion: null, editingHistoryId: null });
-  if (action === "achievement") setView({ name: "achievement", achievementDetailCategoryId: null, achievementTab: view.achievementTab || "progressions", completion: null, editingHistoryId: null });
-  if (action === "achievement-tab") setView({ name: "achievement", achievementDetailCategoryId: null, achievementTab: button.dataset.tab === "skill" ? "skill" : "progressions" });
-  if (action === "achievement-detail") setView({ name: "achievement", achievementDetailCategoryId: button.dataset.category, achievementTab: "progressions" });
+  if (action === "achievement") setView({ name: "achievement", achievementDetailCategoryId: null, skillDetailId: null, achievementTab: view.achievementTab || "progressions", completion: null, editingHistoryId: null });
+  if (action === "achievement-tab") setView({ name: "achievement", achievementDetailCategoryId: null, skillDetailId: null, achievementTab: button.dataset.tab === "skill" ? "skill" : "progressions" });
+  if (action === "achievement-detail") setView({ name: "achievement", achievementDetailCategoryId: button.dataset.category, skillDetailId: null, achievementTab: "progressions" });
+  if (action === "skill-detail") setView({ name: "achievement", achievementDetailCategoryId: null, skillDetailId: button.dataset.skill, achievementTab: "skill" });
   if (action === "home-see-more") document.getElementById("home-intro")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  if (action === "edit-plan") setView({ name: "plan" });
+  if (action === "edit-plan") setView({ name: "plan", planProgramChosen: true });
   if (action === "fixed-detail") setView({ name: "fixed", fixedItemId: button.dataset.item });
   if (action === "timer") setView({ name: "timer" });
   if (action === "timer-mode") setTimerMode(button.dataset.mode);
@@ -1938,6 +2048,7 @@ app.addEventListener("click", (event) => {
   if (action === "program-option") setView({
     name: "plan",
     programId: button.dataset.program,
+    planProgramChosen: true,
     strengthMode: button.dataset.program === "strength" ? getStrengthMode(view.strengthMode || state.strengthMode) : view.strengthMode,
     draftExercises: { ...state.currentExercises, ...(view.draftExercises || {}) },
   });
@@ -2002,6 +2113,11 @@ app.addEventListener("submit", (event) => {
       ? clampNumber(Number(formData.get("seconds") || 0), 0, 999)
       : [0, 1, 2].map((index) => clampNumber(Number(formData.get(`set-${index}`) || 0), 0, 99));
     completeExercise(category, result, form.dataset.historyId || null);
+  }
+
+  if (form.dataset.form === "skill-reps") {
+    const formData = new FormData(form);
+    saveSkillReps(form.dataset.skill, formData.get("reps"));
   }
 });
 
