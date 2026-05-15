@@ -50,7 +50,7 @@ const exerciseMetaMap = {
   fixed: { muscle: "Mobility", type: "Mobility" },
 };
 const BASIC_ROUTINE_ITEMS = [
-  { id: "warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Chuẩn bị khớp, nhịp tim và biên độ vận động.", link: WARM_UP_LINK },
+  { id: "warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Prepare joints, heart rate, and range of motion.", link: WARM_UP_LINK },
   { id: "squat", kind: "category", categoryId: "squat", title: "Squat variation", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
   { id: "pull_up", kind: "category", categoryId: "pull_up", title: "Pull up variation", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
   { id: "handstand_push_up", kind: "category", categoryId: "handstand_push_up", title: "Handstand push up variation", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
@@ -58,13 +58,13 @@ const BASIC_ROUTINE_ITEMS = [
   { id: "push_or_dip", kind: "alternating", title: "Push up or dip variation", prescription: "3 sets, 4-8 reps", note: "Alternate between push up and dip every completed session." },
   { id: "horizontal_pull", kind: "category", categoryId: "horizontal_pull", title: "Horizontal pull variation", prescription: "3 sets, 4-8 reps", note: "Rest 1-2 min between sets." },
   { id: "plank", kind: "category", categoryId: "plank", title: "Plank variation", prescription: "30-60s", note: "One plank hold." },
-  { id: "static_stretching", kind: "fixed", title: "Static stretching", prescription: "10 min", note: "Kết thúc buổi tập.", link: STRETCHING_LINK },
+  { id: "static_stretching", kind: "fixed", title: "Static stretching", prescription: "10 min", note: "Finish the workout.", link: STRETCHING_LINK },
 ];
 const PROGRAM_TEMPLATES = [
   {
     id: "beginner",
     label: "Complete beginner routine",
-    summary: "3 ngày/tuần, khóa bài nền tảng trong 8 tuần trước khi chuyển sang Basic routine.",
+    summary: "3 days/week, locked foundation exercises for 8 weeks before moving to the Basic routine.",
     lockedSetup: true,
     routineItems: [
       { id: "beginner_warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Before every workout.", link: WARM_UP_LINK },
@@ -79,28 +79,28 @@ const PROGRAM_TEMPLATES = [
   {
     id: "basic",
     label: "Start Bodyweight basic routine",
-    summary: "Full body bodyweight routine, 3 buổi/tuần.",
+    summary: "Full body bodyweight routine, 3 sessions/week.",
     lockedSetup: false,
     routineItems: BASIC_ROUTINE_ITEMS,
   },
   {
     id: "strength",
     label: "Strength split",
-    summary: "2 day split, 4-5 ngày/tuần, 5x5 với nghỉ dài hơn.",
+    summary: "2 day split, 4-5 days/week, 5x5 with longer rests.",
     lockedSetup: false,
     routineItems: [
-      { id: "strength_push_warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Chuẩn bị khớp, nhịp tim và biên độ vận động.", link: WARM_UP_LINK },
+      { id: "strength_push_warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Prepare joints, heart rate, and range of motion.", link: WARM_UP_LINK },
       { id: "strength_squat", kind: "category", categoryId: "squat", title: "Squat variation", prescription: "5 sets x 5 reps", note: "Push day." },
       { id: "strength_hspu", kind: "category", categoryId: "handstand_push_up", title: "Handstand push up variation", prescription: "5 sets x 5 reps", note: "Push day." },
       { id: "strength_push_up", kind: "category", categoryId: "push_up", title: "Push up variation", prescription: "5 sets x 5 reps", note: "Push day." },
       { id: "strength_dip", kind: "category", categoryId: "dip", title: "Dip variation", prescription: "5 sets x 5 reps", note: "Push day." },
       { id: "strength_leg_raises", kind: "category", categoryId: "leg_raises", title: "Leg raises variation", prescription: "5 sets x 5 reps", note: "Push day." },
-      { id: "strength_push_stretching", kind: "fixed", title: "Static stretching", prescription: "10 min", note: "Kết thúc buổi tập.", link: STRETCHING_LINK },
-      { id: "strength_pull_warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Chuẩn bị khớp, nhịp tim và biên độ vận động.", link: WARM_UP_LINK },
+      { id: "strength_push_stretching", kind: "fixed", title: "Static stretching", prescription: "10 min", note: "Finish the workout.", link: STRETCHING_LINK },
+      { id: "strength_pull_warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Prepare joints, heart rate, and range of motion.", link: WARM_UP_LINK },
       { id: "strength_pull_up", kind: "category", categoryId: "pull_up", title: "Pull up variation", prescription: "5 sets x 5 reps", note: "Pull day." },
       { id: "strength_horizontal_pull", kind: "category", categoryId: "horizontal_pull", title: "Horizontal pull variation", prescription: "5 sets x 5 reps", note: "Pull day." },
       { id: "strength_plank", kind: "category", categoryId: "plank", title: "Plank variation", prescription: "30-60s", note: "Pull day." },
-      { id: "strength_pull_stretching", kind: "fixed", title: "Static stretching", prescription: "10 min", note: "Kết thúc buổi tập.", link: STRETCHING_LINK },
+      { id: "strength_pull_stretching", kind: "fixed", title: "Static stretching", prescription: "10 min", note: "Finish the workout.", link: STRETCHING_LINK },
     ],
   },
 ];
@@ -473,11 +473,11 @@ function renderPlan() {
     <section class="screen">
       <div class="topbar">
         <div class="brand">
-          <h1>${hasSavedPlan(state) ? "Sửa plan" : "Plan tập của bạn"}</h1>
+          <h1>${hasSavedPlan(state) ? "Edit plan" : "Your training plan"}</h1>
         </div>
         <div class="topbar-actions">
           ${program.id === "strength" ? renderStrengthModeToggle(strengthMode) : ""}
-          <button class="btn primary" type="submit" form="plan-form">Lưu plan</button>
+          <button class="btn primary" type="submit" form="plan-form">Save plan</button>
         </div>
       </div>
       <div class="program-options">
@@ -490,9 +490,9 @@ function renderPlan() {
       </div>
       ${renderGuidanceLinks(program)}
       <div class="panel">
-        <p class="eyebrow">${program.lockedSetup ? "Routine nền tảng đã khóa" : "Chọn variation bằng thanh trượt"}</p>
+        <p class="eyebrow">${program.lockedSetup ? "Foundation routine locked" : "Choose variations with the scroller"}</p>
         <h2>${escapeHtml(program.label)}</h2>
-        <p class="muted">${program.lockedSetup ? "Complete beginner chỉ tập các nhóm bài được liệt kê để xây nền. Không chọn variation ở bước setup." : "Mỗi trường progression chỉ hiện khoảng 4 bài một lúc. Kéo trong danh sách để chọn bài phù hợp hiện tại."}</p>
+        <p class="muted">${program.lockedSetup ? "Complete beginner uses only the listed exercise groups to build a base. Variation selection is locked during setup." : "Each progression field shows about 4 exercises at a time. Scroll the list to choose your current level."}</p>
       </div>
       <form id="plan-form" class="form" data-form="plan" data-program="${program.id}" data-strength-mode="${strengthMode}">
         <div class="routine-editor">
@@ -507,12 +507,13 @@ function renderPlan() {
 function renderHome() {
   app.innerHTML = `
     <section class="screen home-screen">
+      <button class="btn primary home-floating-cta" data-action="list">Start Working Out <span>→</span></button>
       <section class="home-hero">
         <div class="home-hero-copy">
           <p class="home-logo"><img class="home-logo-image" src="./images/brand/favicon.png" alt="" /><span>Start<br />Bodyweight</span></p>
           <h1>Smarter Plan.<br />Stronger You.<br /><span>Every Day.</span></h1>
           <p class="home-description">The all-in-one app inspired by Start Bodyweight by Nick Janvier. Plan your workouts, track your progress, and build real strength with bodyweight training.</p>
-          <button class="btn primary home-cta" data-action="list">Start Working Out <span>→</span></button>
+          <button class="btn home-cta home-see-more" data-action="home-see-more">See More <span>↓</span></button>
         </div>
         <div class="home-hero-media" aria-hidden="true">
           <span class="home-phone-card">
@@ -526,7 +527,7 @@ function renderHome() {
           </span>
         </div>
       </section>
-      <section class="home-intro-grid">
+      <section id="home-intro" class="home-intro-grid">
         ${renderHomeIntroCard("1", "Plan", "calendar", "Get a personalized workout plan that fits your schedule and goals.")}
         ${renderHomeIntroCard("2", "Track", "bar_chart", "Log your workouts, sets, reps, and variations. See your progress clearly.")}
         ${renderHomeIntroCard("3", "Progress", "trend_up", "Follow a proven system with smart progression, deloads, and level-ups built in.")}
@@ -598,7 +599,7 @@ function renderResetConfirmation() {
   return `
     <div class="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="reset-confirm-title">
       <div class="confirm-dialog">
-        <h2 id="reset-confirm-title">Bắt đầu buổi tập mới?</h2>
+        <h2 id="reset-confirm-title">Start a new workout?</h2>
         <div class="confirm-actions">
           <button class="btn primary" data-action="confirm-reset">YES</button>
           <button class="btn" data-action="cancel-reset">NO</button>
@@ -617,7 +618,7 @@ function renderFixedDetail() {
   const completedEntry = getVisibleTodayEntries().find((entry) => entry.kind === "fixed" && entry.itemId === item.id);
   const imageUrl = getFixedItemImage(item);
   const isStretching = getFixedItemLabel(item) === "Stretch";
-  const completedButtonLabel = isStretching ? "Hoàn thành buổi tập" : "Tiếp tục tập";
+  const completedButtonLabel = isStretching ? "Kết thúc buổi tập" : "Tiếp tục";
   const completedButtonAction = isStretching ? "home" : "list";
   app.innerHTML = `
     <section class="screen">
@@ -626,20 +627,22 @@ function renderFixedDetail() {
         <span class="card-overlay"></span>
         <span class="row-main">
           <span class="card-kicker">${escapeHtml(getFixedItemLabel(item))}</span>
-          <strong class="card-title">${escapeHtml(item.title)}</strong>
+          ${renderWorkoutCardTitle(item.title)}
           <span class="row-meta">${escapeHtml(item.note)}</span>
-          ${completedEntry ? `<span class="done-line">Hoàn thành hôm nay</span>` : ""}
         </span>
         <span class="row-actions">
-          ${completedEntry
-            ? `<button class="btn primary small card-continue-button" type="button" data-action="${completedButtonAction}">${completedButtonLabel}</button>`
-            : `<span class="target-pill">${escapeHtml(item.prescription)}</span>`}
+          <span class="target-pill">${escapeHtml(item.prescription)}</span>
         </span>
       </div>
       <div class="panel">
-        <div class="actions">
-          ${item.link ? `<a class="btn guide-button" href="${item.link}" target="_blank" rel="noreferrer">Xem hướng dẫn</a>` : ""}
-          ${completedEntry ? "" : `<button class="btn primary" data-action="toggle-fixed" data-item="${item.id}" data-title="${escapeHtml(item.title)}" data-prescription="${escapeHtml(item.prescription)}">Check done</button>`}
+        <div class="fixed-detail-actions">
+          ${item.link ? `<a class="btn guide-button fixed-guide-button" href="${item.link}" target="_blank" rel="noreferrer">View guide</a>` : ""}
+          ${completedEntry
+            ? `<div class="split-action fixed-completion-split">
+                <button class="btn split-undo" type="button" data-action="undo-fixed" data-entry="${completedEntry.id}">Undo</button>
+                <button class="btn split-continue" type="button" data-action="${completedButtonAction}">${completedButtonLabel}</button>
+              </div>`
+            : `<button class="btn primary fixed-complete-button" data-action="toggle-fixed" data-item="${item.id}" data-title="${escapeHtml(item.title)}" data-prescription="${escapeHtml(item.prescription)}">Hoàn thành</button>`}
         </div>
       </div>
       ${renderBottomNav("workouts")}
@@ -670,15 +673,15 @@ function renderTrack() {
     ? `
       <div class="split-action">
         <button class="btn split-undo" type="button" data-action="undo-exercise" data-entry="${completedEntry.id}">Undo</button>
-        <button class="btn split-continue" type="button" data-action="list">Tiếp tục tập</button>
+        <button class="btn split-continue" type="button" data-action="list">Continue workout</button>
       </div>
     `
     : "";
   const inputPanel = `
     <form class="panel form" data-form="track" data-category="${category.id}" data-history-id="${view.editingHistoryId || ""}">
-      <p class="eyebrow">${historyItem ? "Nhập lần gần nhất" : "Nhập kết quả"}</p>
+      <p class="eyebrow">${historyItem ? "Enter latest result" : "Enter result"}</p>
       ${category.type === "seconds" ? renderSecondsInput(Number(initial || PLANK_START)) : renderRepInputs(initial)}
-      <button class="btn primary" type="submit">${historyItem ? "Lưu chỉnh sửa" : "Hoàn thành"}</button>
+      <button class="btn primary" type="submit">${historyItem ? "Save changes" : "Complete"}</button>
     </form>
   `;
   const completedPanel = `
@@ -686,7 +689,7 @@ function renderTrack() {
       <div class="inspiration-frame" style="--inspiration-image:url('${inspirationImageUrl}')">
         <span class="inspiration-overlay"></span>
         <span class="inspiration-copy">
-          <span class="eyebrow">Hoàn thành hôm nay</span>
+          <span class="eyebrow">Completed today</span>
           <strong>${escapeHtml(exercise)}</strong>
           <span>${formatResult(completedEntry?.result, category.type)}</span>
         </span>
@@ -703,11 +706,11 @@ function renderTrack() {
           <p class="eyebrow">${escapeHtml(category.title)}</p>
           <h2 class="track-exercise-title">${escapeHtml(exercise)}</h2>
           <div class="summary-grid vertical">
-            <div class="metric"><span>Mục tiêu hôm nay</span><strong>${formatResult(target, category.type)}</strong></div>
-            <div class="metric"><span>Lần gần nhất</span><strong>${formatResult(progress.lastResult, category.type)}</strong></div>
-            <div class="metric"><span>Mục tiêu lên bài</span><strong>${formatGoal(category.type)}</strong></div>
+            <div class="metric"><span>Today target</span><strong>${formatResult(target, category.type)}</strong></div>
+            <div class="metric"><span>Latest result</span><strong>${formatResult(progress.lastResult, category.type)}</strong></div>
+            <div class="metric"><span>Level-up goal</span><strong>${formatGoal(category.type)}</strong></div>
           </div>
-          <a class="btn guide-button" href="${category.link}" target="_blank" rel="noreferrer">Xem hướng dẫn</a>
+          <a class="btn guide-button" href="${category.link}" target="_blank" rel="noreferrer">View guide</a>
         </div>
         <div class="track-image" style="--track-image:url('${progressionImageUrl}'); --track-fallback:url('${exerciseImageUrl}')" aria-hidden="true"></div>
       </div>`}
@@ -735,7 +738,7 @@ function renderRepInputs(values) {
 function renderSecondsInput(value) {
   return `
     <label class="set-row">
-      <span>Giây</span>
+      <span>Seconds</span>
       <button class="stepper" type="button" data-action="step" data-target="seconds" data-delta="-5">−</button>
       <input id="seconds" name="seconds" type="number" min="0" max="999" inputmode="numeric" value="${value}" />
       <button class="stepper" type="button" data-action="step" data-target="seconds" data-delta="5">+</button>
@@ -749,14 +752,14 @@ function renderAccumulation() {
     <section class="screen">
       ${topbar("Profile", "")}
       <div class="panel profile-plan">
-        <p class="eyebrow">Plan hiện tại</p>
+        <p class="eyebrow">Current plan</p>
         <h2>${escapeHtml(getPlanLabel())}</h2>
         <p class="plan-text">${escapeHtml(formatRoutineSummary())}</p>
-        <button class="btn primary" data-action="edit-plan">Sửa plan</button>
+        <button class="btn primary" data-action="edit-plan">Edit plan</button>
       </div>
       <div class="panel">
-        <h2>Lịch sử gần nhất</h2>
-        ${recent ? renderHistoryItem(recent) : `<p class="muted">Chưa có buổi tập nào được lưu.</p>`}
+        <h2>Latest history</h2>
+        ${recent ? renderHistoryItem(recent) : `<p class="muted">No workouts saved yet.</p>`}
       </div>
       ${renderBottomNav("profile")}
     </section>
@@ -774,36 +777,36 @@ function renderAchievement() {
   app.innerHTML = `
     <section class="screen achievement-screen">
       ${topbar("Achievement", "")}
-      <div class="achievement-tabs" role="tablist" aria-label="Achievement sections">
-        <button class="achievement-tab ${activeTab === "progressions" ? "active" : ""}" data-action="achievement-tab" data-tab="progressions" role="tab" aria-selected="${activeTab === "progressions"}">All Progressions</button>
-        <button class="achievement-tab ${activeTab === "skill" ? "active" : ""}" data-action="achievement-tab" data-tab="skill" role="tab" aria-selected="${activeTab === "skill"}">Skill</button>
-      </div>
-      ${activeTab === "progressions" ? `
-        <div class="achievement-legend">
-          ${renderAchievementLegendItem("beginner", "Beginner")}
-          ${renderAchievementLegendItem("intermediate", "Intermediate")}
-          ${renderAchievementLegendItem("pro", "Pro")}
-          ${renderAchievementLegendItem("master", "Master")}
-        </div>
-        <div class="achievement-list">
-          ${progressions.map((category) => renderAchievementCard(category)).join("")}
-        </div>
-      ` : `
-        <div class="achievement-list skill-list">
-          ${ADVANCED_SKILLS.map((skill) => renderSkillCard(skill)).join("")}
-        </div>
-      `}
+      ${renderAchievementTabs(activeTab)}
+      ${activeTab === "skill"
+        ? `<div class="achievement-list skill-list">${ADVANCED_SKILLS.map((skill) => renderSkillCard(skill)).join("")}</div>`
+        : `<div class="achievement-list">${progressions.map((category) => renderAchievementCard(category)).join("")}</div>`
+      }
       ${renderBottomNav("achievement")}
     </section>
   `;
 }
 
-function renderAchievementLegendItem(tier, label) {
+function renderAchievementTabs(activeTab) {
   return `
-    <span class="achievement-legend-item">
-      <span class="achievement-dot tier-${tier}"></span>
-      ${label}
-    </span>
+    <div class="achievement-tabs" role="tablist" aria-label="Achievement views">
+      <button
+        class="achievement-tab ${activeTab === "progressions" ? "active" : ""}"
+        type="button"
+        data-action="achievement-tab"
+        data-tab="progressions"
+        role="tab"
+        aria-selected="${activeTab === "progressions"}"
+      >All Progressions</button>
+      <button
+        class="achievement-tab ${activeTab === "skill" ? "active" : ""}"
+        type="button"
+        data-action="achievement-tab"
+        data-tab="skill"
+        role="tab"
+        aria-selected="${activeTab === "skill"}"
+      >Skill</button>
+    </div>
   `;
 }
 
@@ -815,33 +818,40 @@ function renderAchievementCard(category) {
   const tier = getAchievementTier(currentIndex, total);
   const currentExercise = getCurrentExercise(category);
   const finalExercise = category.exercises[total - 1];
+  const tierVars = getTierCssVars(tier);
   return `
-    <article class="achievement-card tier-${tier}">
-      <div class="achievement-icon-ring">
-        <img class="achievement-image" src="./images/achievements/${category.id}.png" alt="" />
-      </div>
-      <div class="achievement-title-block">
-        <h2>${escapeHtml(category.title)}</h2>
-        <p>${achievedCount}/${total} skills <span>${percent}%</span></p>
+    <article class="achievement-card tier-${tier} ${total >= 13 ? "dense-nodes" : ""}" style="--achievement-count:${total}; ${tierVars}">
+      <div class="achievement-identity">
+        <div class="achievement-icon-ring">
+          <img class="achievement-image" src="./images/achievements/${category.id}.png" alt="" />
+        </div>
+        <div class="achievement-title-block">
+          <h2>${escapeHtml(getProgressionDisplayTitle(category.title))}</h2>
+          <p><strong>${achievedCount}/${total}</strong> skills <span>${percent}%</span></p>
+        </div>
       </div>
       <div class="achievement-track">
-        <div class="achievement-steps" style="--achievement-count:${total}">
-          ${category.exercises.map((exercise, index) => `
+        <div class="achievement-steps">
+          ${category.exercises.map((exercise, index) => {
+            const stepTier = getAchievementStepTier(index, total);
+            return `
             <span
-              class="achievement-step ${index < currentIndex ? "achieved" : ""} ${index === currentIndex ? "current" : ""} ${index > currentIndex ? "locked" : ""}"
+              class="achievement-step tier-${stepTier} ${index < currentIndex ? "achieved reached is-completed" : ""} ${index === currentIndex ? "current reached is-current" : ""} ${index > currentIndex ? "locked is-locked" : ""}"
+              style="${getNodeCssVars(stepTier)}"
               title="${escapeHtml(exercise)}"
             >${index > currentIndex ? iconSvg("lock") : index + 1}</span>
-          `).join("")}
+          `;
+          }).join("")}
         </div>
         <div class="achievement-exercise-labels">
-          <span>${escapeHtml(currentExercise)}</span>
-          <span>${escapeHtml(finalExercise)}</span>
+          ${renderAchievementExerciseLabel(currentExercise)}
+          ${renderAchievementExerciseLabel(finalExercise)}
         </div>
         <div class="achievement-tier-labels">
-          <span class="tier-beginner">Beginner</span>
-          <span class="tier-intermediate">Intermediate</span>
-          <span class="tier-pro">Pro</span>
-          <span class="tier-master">Master</span>
+          <span class="tier-label tier-beginner ${getAchievementTierLabelState("beginner", currentIndex, total)}">Beginner</span>
+          <span class="tier-label tier-intermediate ${getAchievementTierLabelState("intermediate", currentIndex, total)}">Intermediate</span>
+          <span class="tier-label tier-pro ${getAchievementTierLabelState("pro", currentIndex, total)}">Pro</span>
+          <span class="tier-label tier-master ${getAchievementTierLabelState("master", currentIndex, total)}">Master</span>
         </div>
       </div>
       <button class="achievement-open" data-action="achievement-detail" data-category="${category.id}" aria-label="${escapeHtml(category.title)}">›</button>
@@ -907,23 +917,23 @@ function renderTimer() {
   const isDone = timerState.remaining <= 0;
   app.innerHTML = `
     <section class="screen timer-screen">
-      ${topbar("Timer", "")}
+      ${topbar("Timer", "", `<button class="btn small icon-action timer-settings" type="button" aria-label="Timer settings">${iconSvg("settings")}</button>`)}
       ${isDone ? "" : `<div class="timer-mode-tabs">
         <button class="timer-mode ${timerState.mode === "rest" ? "active rest" : ""}" data-action="timer-mode" data-mode="rest">REST</button>
         <button class="timer-mode ${timerState.mode === "break" ? "active break" : ""}" data-action="timer-mode" data-mode="break">BREAK</button>
       </div>`}
       ${!isDone && timerState.mode === "rest" ? `
         <div class="timer-duration-tabs" aria-label="Rest duration">
-          <button class="timer-duration ${timerState.restDuration === 60 ? "active" : ""}" data-action="timer-duration" data-duration="60">1 phút</button>
-          <button class="timer-duration ${timerState.restDuration === 120 ? "active" : ""}" data-action="timer-duration" data-duration="120">2 phút</button>
+          <button class="timer-duration ${timerState.restDuration === 60 ? "active" : ""}" data-action="timer-duration" data-duration="60">1 min</button>
+          <button class="timer-duration ${timerState.restDuration === 120 ? "active" : ""}" data-action="timer-duration" data-duration="120">2 min</button>
         </div>
       ` : ""}
       <div class="timer-watch ${timerState.mode}" style="--timer-progress:${Math.round(progress * 360)}deg; --timer-accent:${modeConfig.accent};">
         ${isDone ? `
           <p class="eyebrow">BACK TO WORK</p>
           <h1>NEXT SET</h1>
-          <p class="muted">Chuông sẽ dừng khi bạn tiếp tục tập.</p>
-          <button class="btn primary pulse" data-action="timer-continue">Tiếp tục tập</button>
+          <p class="muted">The alert stops when you continue training.</p>
+          <button class="btn primary pulse" data-action="timer-continue">Continue workout</button>
         ` : `
           <p class="eyebrow">${modeConfig.title}</p>
           <div class="timer-ring">
@@ -1086,7 +1096,7 @@ function renderHistoryItem(item) {
         <strong>${escapeHtml(item.exerciseName)}</strong><br />
         <span class="muted">${formatDate(item.date)} · ${formatResult(item.result, type)}</span>
       </span>
-      ${category ? `<button class="btn" data-action="edit-history" data-history-id="${item.id}">Sửa</button>` : ""}
+      ${category ? `<button class="btn" data-action="edit-history" data-history-id="${item.id}">Edit</button>` : ""}
     </div>
   `;
 }
@@ -1094,7 +1104,7 @@ function renderHistoryItem(item) {
 function topbar(title, backAction, extraActions = "", variant = "") {
   return `
     <div class="topbar ${backAction ? "with-back" : ""} ${variant ? `topbar-${variant}` : ""}">
-      ${backAction ? `<button class="back-fab" data-action="${backAction}" aria-label="Quay lại"></button>` : ""}
+      ${backAction ? `<button class="back-fab" data-action="${backAction}" aria-label="Back"></button>` : ""}
       <div class="brand">
         <h1>${escapeHtml(title)}</h1>
       </div>
@@ -1137,6 +1147,7 @@ function iconSvg(name) {
     home: `<path d="M4 11 12 4l8 7v9H6v-7h12"></path>`,
     dumbbell: `<rect x="3" y="8" width="3" height="8" rx="1"></rect><rect x="6" y="6" width="3" height="12" rx="1"></rect><path d="M9 12h6"></path><rect x="15" y="6" width="3" height="12" rx="1"></rect><rect x="18" y="8" width="3" height="8" rx="1"></rect>`,
     timer: `<path d="M12 8v5l3 2"></path><circle cx="12" cy="13" r="8"></circle><path d="M9 2h6M12 2v3"></path>`,
+    settings: `<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 0 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 0 1 7.1 4l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 0 1 19.9 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"></path>`,
     profile: `<circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path>`,
     lock: `<rect x="6" y="10" width="12" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path>`,
     check: `<path d="m5 13 4 4L19 7"></path>`,
@@ -1210,6 +1221,68 @@ function getAchievementTier(index, total) {
   if (ratio >= 0.51) return "pro";
   if (ratio >= 0.26) return "intermediate";
   return "beginner";
+}
+
+function getProgressionDisplayTitle(title) {
+  return String(title || "").replace(/\s+progression$/i, "");
+}
+
+const tierColors = {
+  beginner: { color: "#9cff2e", rgb: "156, 255, 46" },
+  intermediate: { color: "#28a8ff", rgb: "40, 168, 255" },
+  pro: { color: "#d85cff", rgb: "216, 92, 255" },
+  master: { color: "#ffb21f", rgb: "255, 178, 31" },
+};
+
+function getTierCssVars(tier) {
+  const color = tierColors[tier] || tierColors.beginner;
+  return `--tier-color:${color.color}; --tier-rgb:${color.rgb}; --current-tier-color:${color.color}; --current-tier-glow:rgba(${color.rgb}, 0.30);`;
+}
+
+function getNodeCssVars(tier) {
+  const color = tierColors[tier] || tierColors.beginner;
+  return `--node-color:${color.color}; --node-rgb:${color.rgb}; --node-glow:rgba(${color.rgb}, 0.34);`;
+}
+
+function getExerciseLabelFitClass(text) {
+  const length = String(text || "").length;
+  if (length >= 30) return "label-fit-small";
+  if (length >= 20) return "label-fit-medium";
+  return "label-fit-normal";
+}
+
+function renderAchievementExerciseLabel(text) {
+  return `
+    <span class="achievement-exercise-label ${getExerciseLabelFitClass(text)}">
+      ${escapeHtml(text)}
+    </span>
+  `;
+}
+
+function getExerciseLabelLines(text) {
+  const words = String(text || "").trim().split(/\s+/).filter(Boolean);
+  if (words.length <= 2) return [words.join(" ")];
+  if (words.length === 3) return [words[0], words.slice(1).join(" ")];
+
+  const lines = [];
+  for (let index = 0; index < words.length; index += 2) {
+    lines.push(words.slice(index, index + 2).join(" "));
+  }
+  return lines;
+}
+
+function getAchievementStepTier(index, total) {
+  return getAchievementTier(index, total);
+}
+
+function getAchievementTierLabelState(tier, currentIndex, total) {
+  const tiers = ["beginner", "intermediate", "pro", "master"];
+  const currentTier = getAchievementTier(currentIndex, total);
+  const tierPosition = tiers.indexOf(tier);
+  const currentPosition = tiers.indexOf(currentTier);
+  if (tierPosition < currentPosition) return "reached";
+  if (tierPosition === currentPosition) return "current";
+  return "future";
 }
 
 function completeExercise(category, result, historyId = null) {
@@ -1499,8 +1572,8 @@ function renderGuidanceLinks(program) {
   return `
     <div class="panel guide-panel">
       <div class="brand">
-        <p class="eyebrow">Hướng dẫn trước khi chọn plan</p>
-        <h2>Xem độ khó và kỹ thuật</h2>
+        <p class="eyebrow">Guide before choosing a plan</p>
+        <h2>Review difficulty and technique</h2>
       </div>
       <div class="guide-links">
         ${getProgramGuidanceLinks(program).map((guide) => `
@@ -1612,7 +1685,7 @@ function renderRoutineSetupItem(item, draftExercises, program) {
         <p class="eyebrow">${escapeHtml(item.title)}</p>
         <strong>${escapeHtml(item.prescription)}</strong>
         <span class="muted">${escapeHtml(item.note)}</span>
-        ${item.link ? `<a class="link" href="${item.link}" target="_blank" rel="noreferrer">Xem hướng dẫn</a>` : ""}
+        ${item.link ? `<a class="link" href="${item.link}" target="_blank" rel="noreferrer">View guide</a>` : ""}
       </div>
     `;
   }
@@ -1680,9 +1753,9 @@ function renderWorkoutRow(item, index) {
         <span class="card-overlay"></span>
         <span class="row-main">
           <span class="card-kicker">${escapeHtml(getFixedItemLabel(item))}</span>
-          <strong class="card-title">${escapeHtml(item.title)}</strong>
+          ${renderWorkoutCardTitle(item.title)}
           <span class="row-meta">${escapeHtml(item.note)}</span>
-          ${completedEntry ? `<span class="done-line">Hoàn thành hôm nay</span>` : ""}
+          ${completedEntry ? `<span class="done-line">Completed today</span>` : ""}
         </span>
         <span class="row-actions">
           ${completedEntry
@@ -1705,9 +1778,9 @@ function renderWorkoutRow(item, index) {
   const meta = getExerciseMeta(category, exercise);
   const difficulty = getExerciseDifficulty(category);
   const imageUrl = exerciseImageMap[imageKey] || exerciseImageMap.strength;
-  const alternatingNote = item.kind === "alternating" ? `Luân phiên: hôm nay ${category.id === "push_up" ? "push up" : "dip"}` : item.note;
+  const alternatingNote = item.kind === "alternating" ? `Alternating: today is ${category.id === "push_up" ? "push up" : "dip"}` : item.note;
   const rowActions = [
-    ready ? `<span class="status-pill ready">Đủ lên bài</span>` : "",
+    ready ? `<span class="status-pill ready">Ready to level up</span>` : "",
     latestCompletedEntry ? `<span class="btn small card-reset-button" data-action="undo-exercise" data-entry="${latestCompletedEntry.id}" aria-label="Reset completion">${iconSvg("restore")}</span>` : "",
   ].filter(Boolean).join("");
   return `
@@ -1715,7 +1788,7 @@ function renderWorkoutRow(item, index) {
       <span class="card-overlay"></span>
       <span class="row-main">
         <span class="card-kicker">${escapeHtml(meta.type)}</span>
-        <strong class="card-title">${escapeHtml(exercise)}</strong>
+        ${renderWorkoutCardTitle(exercise)}
         <span class="row-meta">${escapeHtml(alternatingNote)}</span>
         <span class="card-stats">
           <span>${escapeHtml(meta.muscle)}</span>
@@ -1729,9 +1802,9 @@ function renderWorkoutRow(item, index) {
         ` : ""}
         ${latestCompletedEntry ? (() => {
           const entryCategory = getCategory(latestCompletedEntry.category);
-          return `<span class="done-line">Hoàn thành hôm nay: ${escapeHtml(latestCompletedEntry.exerciseName)} - ${formatResult(latestCompletedEntry.result, entryCategory.type)}</span>`;
+          return `<span class="done-line">Completed today: ${escapeHtml(latestCompletedEntry.exerciseName)} - ${formatResult(latestCompletedEntry.result, entryCategory.type)}</span>`;
         })() : ""}
-        ${ready ? `<span class="row-meta">Gợi ý: chuyển sang ${escapeHtml(getNextExercise(category) || "bài cuối")}</span>` : ""}
+        ${ready ? `<span class="row-meta">Suggestion: move to ${escapeHtml(getNextExercise(category) || "the final exercise")}</span>` : ""}
         <span class="card-field-label">${escapeHtml(getShortCategoryLabel(category.id))}</span>
       </span>
       ${rowActions ? `<span class="row-actions">${rowActions}</span>` : ""}
@@ -1741,6 +1814,42 @@ function renderWorkoutRow(item, index) {
 
 function getCurrentExercise(category) {
   return category.exercises[state.currentExercises[category.id]] || category.exercises[0];
+}
+
+function getCardTitleFitClass(text) {
+  const length = String(text || "").length;
+  if (length >= 28) return "title-fit-small";
+  if (length >= 15) return "title-fit-medium";
+  return "";
+}
+
+function renderWorkoutCardTitle(text) {
+  return `
+    <strong class="card-title ${getCardTitleFitClass(text)}">
+      ${getWorkoutCardTitleLines(text).map((line) => `<span class="card-title-line">${escapeHtml(line)}</span>`).join("")}
+    </strong>
+  `;
+}
+
+function getWorkoutCardTitleLines(text) {
+  const words = String(text || "").trim().split(/\s+/).filter(Boolean);
+  const lines = [];
+  let currentLine = "";
+
+  words.forEach((word) => {
+    const candidate = currentLine ? `${currentLine} ${word}` : word;
+    if (candidate.length <= 10) {
+      currentLine = candidate;
+      return;
+    }
+    if (currentLine) lines.push(currentLine);
+    currentLine = word;
+  });
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+  return lines.length ? lines : [String(text || "")];
 }
 
 function getNextExercise(category) {
@@ -1803,9 +1912,10 @@ app.addEventListener("click", (event) => {
   if (action === "home") setView({ name: "home", completion: null, editingHistoryId: null });
   if (action === "list") setView({ name: "list", completion: null, editingHistoryId: null });
   if (action === "accumulation") setView({ name: "accumulation", completion: null, editingHistoryId: null });
-  if (action === "achievement") setView({ name: "achievement", achievementTab: "progressions", achievementDetailCategoryId: null, completion: null, editingHistoryId: null });
+  if (action === "achievement") setView({ name: "achievement", achievementDetailCategoryId: null, achievementTab: view.achievementTab || "progressions", completion: null, editingHistoryId: null });
   if (action === "achievement-tab") setView({ name: "achievement", achievementDetailCategoryId: null, achievementTab: button.dataset.tab === "skill" ? "skill" : "progressions" });
-  if (action === "achievement-detail") setView({ name: "achievement", achievementTab: "progressions", achievementDetailCategoryId: button.dataset.category });
+  if (action === "achievement-detail") setView({ name: "achievement", achievementDetailCategoryId: button.dataset.category, achievementTab: "progressions" });
+  if (action === "home-see-more") document.getElementById("home-intro")?.scrollIntoView({ behavior: "smooth", block: "start" });
   if (action === "edit-plan") setView({ name: "plan" });
   if (action === "fixed-detail") setView({ name: "fixed", fixedItemId: button.dataset.item });
   if (action === "timer") setView({ name: "timer" });
