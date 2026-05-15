@@ -4770,8 +4770,8 @@ textarea {
   padding: 0;
 }
 
-.fixed-completion-split .split-continue,
-.fixed-completion-split .split-continue:hover {
+.split-action .split-continue,
+.split-action .split-continue:hover {
   border-color: rgba(255, 138, 45, 0.72);
   background:
     radial-gradient(circle at 28% 0%, rgba(255, 255, 255, 0.42), transparent 34%),

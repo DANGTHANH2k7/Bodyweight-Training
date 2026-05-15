@@ -693,7 +693,7 @@ function renderTrack() {
     ? `
       <div class="split-action">
         <button class="btn split-undo" type="button" data-action="undo-exercise" data-entry="${completedEntry.id}">Undo</button>
-        <button class="btn split-continue" type="button" data-action="list">Continue workout</button>
+        <button class="btn split-continue" type="button" data-action="list">Continue</button>
       </div>
     `
     : "";
