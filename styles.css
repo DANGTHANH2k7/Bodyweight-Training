@@ -5090,17 +5090,21 @@ textarea {
 }
 
 .skill-media-guide {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 2;
-  min-height: 44px;
-  padding-inline: 18px;
-  border-radius: 18px;
+  display: none;
 }
 
 .skill-detail-prerequisites {
   padding-top: 4px;
+}
+
+.skill-detail-guide-below {
+  width: 100%;
+  min-height: 58px;
+  display: inline-flex;
+  justify-content: center;
+  border-radius: 22px;
+  margin-top: 2px;
+  padding-inline: 24px;
 }
 
 .skill-rep-form {
@@ -5130,9 +5134,14 @@ textarea {
     right: 14px;
   }
 
-  .skill-media-guide {
-    top: 12px;
-    right: 12px;
-    transform: translateY(calc(58px + 10px));
+  .skill-detail-guide-below,
+  .skill-detail-guide-below:hover {
+    width: 100%;
+    min-height: 58px;
+    display: inline-flex;
+    justify-content: center;
+    border-radius: 22px;
+    margin-top: 2px;
+    padding-inline: 24px;
   }
 }

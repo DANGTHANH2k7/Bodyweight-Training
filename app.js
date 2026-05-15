@@ -961,6 +961,7 @@ function renderSkillDetail(skill) {
             </span>
           `).join("")}
         </div>
+        ${guideLink ? `<a class="btn guide-button skill-detail-guide-below" href="${guideLink}" target="_blank" rel="noreferrer">View guide</a>` : ""}
         <form class="skill-rep-form" data-form="skill-reps" data-skill="${skill.id}">
           <label class="set-row">
             <span>Reps</span>
