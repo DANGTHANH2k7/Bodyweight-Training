@@ -1183,6 +1183,17 @@ input[readonly] {
   background: var(--soft);
 }
 
+.plan-mode-sticky {
+  display: flex;
+  justify-content: center;
+  margin-top: -4px;
+  padding: 8px 0;
+}
+
+.plan-mode-sticky .strength-mode-toggle {
+  width: min(100%, 300px);
+}
+
 .strength-mode-toggle {
   display: inline-grid;
   grid-template-columns: repeat(2, minmax(64px, 1fr));

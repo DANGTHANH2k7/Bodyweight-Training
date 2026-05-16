@@ -496,7 +496,6 @@ function renderPlan() {
           <h1>${hasSavedPlan(state) ? "Edit plan" : "Your training plan"}</h1>
         </div>
         ${showPlanEditor ? `<div class="topbar-actions">
-          ${program.id === "strength" ? renderStrengthModeToggle(strengthMode) : ""}
           <button class="btn primary" type="submit" form="plan-form">Save plan</button>
         </div>` : ""}
       </div>
@@ -509,6 +508,11 @@ function renderPlan() {
           </button>
         `).join("")}
       </div>
+      ${showPlanEditor && program.id === "strength" ? `
+        <div class="plan-mode-sticky">
+          ${renderStrengthModeToggle(strengthMode)}
+        </div>
+      ` : ""}
       ${showPlanEditor ? `
         ${renderGuidanceLinks(program)}
         <div class="panel">
