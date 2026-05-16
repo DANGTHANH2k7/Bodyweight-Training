@@ -1146,6 +1146,7 @@ input[readonly] {
 
 .program-card {
   display: grid;
+  grid-template-rows: auto auto 1fr;
   gap: 8px;
   min-height: 112px;
   padding: 14px;
@@ -1160,6 +1161,21 @@ input[readonly] {
 .program-card span {
   color: var(--muted);
   line-height: 1.35;
+}
+
+.program-card .program-tag {
+  align-self: end;
+  justify-self: start;
+  max-width: none;
+  padding: 5px 9px;
+  border: 1px solid rgba(255, 138, 45, 0.34);
+  border-radius: 999px;
+  background: rgba(255, 138, 45, 0.12);
+  color: #ffb26f;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .program-card.selected {

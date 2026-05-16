@@ -65,7 +65,8 @@ const PROGRAM_TEMPLATES = [
   {
     id: "beginner",
     label: "Complete beginner routine",
-    summary: "Foundation plan. 3 days/week.",
+    summary: "Recommend: 3 days/week.",
+    tag: "Beginner",
     lockedSetup: true,
     routineItems: [
       { id: "beginner_warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Before every workout.", link: WARM_UP_LINK },
@@ -80,14 +81,16 @@ const PROGRAM_TEMPLATES = [
   {
     id: "basic",
     label: "Start Bodyweight basic routine",
-    summary: "Full body. 3 sessions/week.",
+    summary: "Recommend: 3 days/week.",
+    tag: "Customization",
     lockedSetup: false,
     routineItems: BASIC_ROUTINE_ITEMS,
   },
   {
     id: "strength",
     label: "Strength split",
-    summary: "Push/pull split. 4-5 days/week.",
+    summary: "Recommend: 5 days/week.",
+    tag: "Customization",
     lockedSetup: false,
     routineItems: [
       { id: "strength_push_warm_up", kind: "fixed", title: "Dynamic warm up", prescription: "10 min", note: "Prepare joints, heart rate, and range of motion.", link: WARM_UP_LINK },
@@ -502,6 +505,7 @@ function renderPlan() {
           <button class="program-card ${template.id === program.id ? "selected" : ""}" data-action="program-option" data-program="${template.id}">
             <strong>${escapeHtml(template.label)}</strong>
             <span>${escapeHtml(template.summary)}</span>
+            <span class="program-tag">${escapeHtml(template.tag)}</span>
           </button>
         `).join("")}
       </div>
